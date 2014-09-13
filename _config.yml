@@ -1,0 +1,21 @@
+# Dependencies
+markdown:         redcarpet
+pygments:         true
+
+# Permalinks
+permalink:        pretty
+
+# Setup
+title:            Yi
+tagline:          'Yi-editor.'
+description:      'Text editor written in Haskell.'
+url:              http://yi-editor.github.io
+baseurl:          http://yi-editor.github.io
+
+author:
+  name:           'Yi Dev'
+
+paginate:         5
+
+github:
+  account:        https://github.com/yi-editor/yi
