@@ -10,7 +10,7 @@ title:            Yi
 tagline:          'Yi-editor.'
 description:      'Text editor written in Haskell.'
 url:              http://yi-editor.github.io
-baseurl:          http://yi-editor.github.io
+baseurl:          http://yi-editor.github.io/
 
 author:
   name:           'Yi Dev'
