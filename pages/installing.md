@@ -3,16 +3,17 @@ layout: page
 title: Installing Yi
 ---
 
-## Installing
 
-Yi requires the Haskell Platform 2011.2.0.0 at minimum (for GHC 7, alex, and cabal-install, among other things).
+Yi requires GHC 7.6.3 at minimum and is mainly developed with GHC 7.8.3.
 
 With the Haskell Platform installed, yi should be installed with cabal-install:
 
     $ cabal update
     $ cabal install yi
 
-On Linux systems, you'll probably need ncurses development headers for the Vty frontend. On Ubuntu, you'll need to install the `libncurses5-dev` package.
+On Linux systems, you'll probably need ncurses development headers for
+the Vty frontend. On Ubuntu, you'll need to install the
+`libncurses5-dev` package.
 
 You can specify frontends to compile, also:
 
@@ -20,24 +21,23 @@ You can specify frontends to compile, also:
 
 Options are `-fvty` and `-fpango`.
 
-You can also install the `yi-contrib` package, which contains some extra contributed things (like user configs):
+You can also install the `yi-contrib` package, which contains some
+extra contributed things (like user configs):
 
     $ cabal install yi-contrib
 
 If you're in the source repository, you can install yi from source:
 
     $ cabal update # Still update to get updated dependencies
-    $ (cd yi && cabal install)
+    $ cd yi && cabal install
 
 And the contrib package:
 
-    $ (cd yi-contrib && cabal install)
+    $ cd yi-contrib && cabal install
 
-If you're getting errors about Alex version bounds or are experiencing
-similar problems, it's recommended that you install from the sources
-available in the GitHub repository which has the version bounds
-adjusted and contains a couple of nice fixes that might not be present
-in the latest Hackage version.
+Please note that if you are looking to get absolutely latest sources,
+you should set up the supporting repositories from
+[the GitHub project page][ghproject] first.
 
 ### Installing inside a Cabal sandbox
 
@@ -67,7 +67,7 @@ sandbox's package DB using `cabal exec ./dist/build/yi/yi`. It may be useful
 to create an alias or small script for this, along the lines of:
 
 ```
-#!/bin/bash
+#!/usr/bin/env bash
 YI_DIR=$HOME/programming/yi/yi
 env CABAL_SANDBOX_CONFIG=$YI_DIR/cabal.sandbox.config cabal exec $YI_DIR/dist/build/yi/yi "$@"
 ```
@@ -104,12 +104,23 @@ I suspect that it'd be perfectly possible to make your config file
 into a cabal project and manage the dependencies that way but I have
 not yet investigated this approach.
 
+Still doesn't work? Try the older instructions such as those removed
+[here](https://github.com/yi-editor/yi/commit/05b4d89b5e6a2ecd17a23a04659c7b5d828786d3)
+or
+[here](https://github.com/yi-editor/yi/commit/63cefe048e4f3f50d364150085b617424477e333).
+Make sure to let us know!
+
 ## Getting Source
 
-Yi source repository is available on [GitHub][github].
+Yi source repository is available on [GitHub](https://github.com/yi-editor/yi).
 
 To get the git version,
 
     $ git clone git://github.com/yi-editor/yi.git
 
-(There may be more repositories in the future, as yi is split more.)
+If you plan to do more serious hacking, you probably want the
+supporting repositories from the
+[GitHub project page][ghproject]. You should
+cross-reference with the cabal file to see what you might need.
+
+[ghproject]: https://github.com/yi-editor
