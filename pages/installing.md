@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Installing Yi
+title: Installing/hacking Yi
 ---
 
 
@@ -38,6 +38,10 @@ And the contrib package:
 Please note that if you are looking to get absolutely latest sources,
 you should set up the supporting repositories from
 [the GitHub project page][ghproject] first.
+
+Note: if you're having weird problems such as your changes not seeming
+to take effect, you might have some stale stuff in the cache
+directory which you should empty: on my system it's `~/.cache/yi`.
 
 ### Installing inside a Cabal sandbox
 
@@ -110,17 +114,179 @@ or
 [here](https://github.com/yi-editor/yi/commit/63cefe048e4f3f50d364150085b617424477e333).
 Make sure to let us know!
 
-## Getting Source
+### Hacking Yi with nix
 
-Yi source repository is available on [GitHub](https://github.com/yi-editor/yi).
+Hacking Yi with nix is pretty easy. Forget about cabal sanboxes and
+other nastiness. You will first need a way to override the Haskell
+package set. I will not go into this here, see NixOS wiki and other
+associated resources for help.
 
-To get the git version,
+Once you have done this, you'll need project files for each repository
+Yi depends on, as seen in its cabal file and from the repos
+[here][ghproject].
 
-    $ git clone git://github.com/yi-editor/yi.git
+I'll first discuss setting up the supporting repos and then move onto
+the main repository. The supporting repos don't need anything unusual,
+make project files and stick them in your overrides as always.
 
-If you plan to do more serious hacking, you probably want the
-supporting repositories from the
-[GitHub project page][ghproject]. You should
-cross-reference with the cabal file to see what you might need.
+#### Setting up supporting repositiories
+
+For each repository, you'll need `default.nix` and most likely
+`shell.nix` too if you want to do hacking in it. Consider `yi-rope`
+repository as an example.
+
+Check out `yi-rope` from git into somewhere. Generate `default.nix`
+with `cabal2nix` and stash it somewhere accessible. Add `shell.nix`
+in the same directory, with the trivial contents:
+
+```
+let pkgs = import <nixpkgs> {};
+    myHaskellPackages = pkgs.myHaskellPackages;
+    haskellPackages = myHaskellPackages.override {
+      extension = self: super: {
+        yiRope = myHaskellPackages.callPackage ./. {};
+      };
+    };
+in pkgs.lib.overrideDerivation haskellPackages.yiRope (attrs: {
+  noHaddock = true;
+  buildInputs = [ ] ++ attrs.buildInputs;
+})
+
+```
+
+`myHaskellPackages` is my overriden package set. `noHaddock = true` so
+that hacking is not slow inside nix-shell. You can add extra tools you
+like to use to the `buildInputs` list.
+
+Symlink your `default.nix` and `shell.nix` from within your `yi-rope`
+checkout and ignore them in git (locally, not in .gitignore)
+
+```
+[shana@lenalee:~/programming/yi]$ l ~/programming/yi-rope
+total 168K
+drwxr-xr-x   6 shana shana   4.0K Sep 29 06:59 .
+drwxr-xr-x 199 shana shana   4.0K Oct  5 18:36 ..
+lrwxrwxrwx   1 shana shana     64 Sep  6 06:59 default.nix -> /home/shana/programming/nix-project-defaults/yi-rope/default.nix
+lrwxrwxrwx   1 shana shana     62 Sep  6 06:58 shell.nix -> /home/shana/programming/nix-project-defaults/yi-rope/shell.nix
+…
+```
+
+Then stick it into your Haskell overrides. Currently my overrides for
+Yi repos look as follows:
+
+```
+wordTrie          = normalPackageS se "word-trie";
+ooPrototypes      = normalPackageS se "oo-prototypes";
+yiLanguage        = normalPackageS se "yi-language";
+yiRope            = normalPackageS se "yi-rope";
+dynamicState      = normalPackageS se "dynamic-state";
+```
+
+where `normalPackageS` is just a handy alias for `callPackage`. See
+[my setup](https://github.com/Fuuzetsu/nix-project-defaults/blob/master/nixpkgs-config/config.nix)
+for details. Hack on these as you would with any normal project.
+
+#### Setting up main repository
+
+Now for the main repository. The tricky bit is that Yi needs to be
+able to find its packages and its dependencies at runtime so that
+running the GHCi evaluator (`M-x`) works. First generate `default.nix`
+and use a stock `shell.nix` as usual. You might want to manually add
+`vty` to dependency list and set
+
+```
+  configureFlags = [ "-fpango" "-fvty" ];
+
+  # https://ghc.haskell.org/trac/ghc/ticket/9170
+  noHaddock = self.ghc.version == "7.6.3";
+```
+
+Symlink the project files as usual. The generated `default.nix` should
+have all the supporting repositories listed so `nix-shell --pure`
+should just work: remember to add the repos to your Haskell package
+set.
+
+Once you're in the shell, the first thing you want to do is `eval
+"$configurePhase" && eval "$buildPhase"`: this will fully build Yi
+once which has the side effect of generating all the CPP macros and
+cabal-generated files. It also has the effect of setting
+`GHC_PACKAGE_PATH` which is useful later.
+
+You should now be able to simply use `ghci` on any file in the
+repository: `.ghci` is already set up to pick everything up.
+
+Once you're done making changes, you probably want to run Yi and try
+them out. Run `eval "$buildPhase"` to build Yi. You can run the tests
+with `eval "$checkPhase"`.
+
+Now to run it, use something like
+
+```
+[nix-shell:~/programming/yi/yi]$ GHC_PACKAGE_PATH="$(pwd)/dist/package.conf.inplace:$GHC_PACKAGE_PATH" TERM=xterm yi_datadir=. dist/build/yi/yi -y /tmp -fpango --as=emacs /tmp/T.hs
+```
+
+Here's what happens: we set `GHC_PACKAGE_PATH` to the generated Yi
+package config inside dist (this allows us to find Yi modules) and the
+rest of packages (this allows to find all the dependencies). The
+reason for `$(pwd)/…` rather than a relative path is to keep this
+working after we `M-x cd` inside the editor. We set `TERM` which you
+might need depending on your terminal due to `nix-shell` messing with
+some env vars to ensure purity. We also set `yi_datadir` to the
+current directory so that Yi can finds its icon and such.
+
+Once all those are set, we run the compiled Yi itself
+(`dist/build/yi/yi`), point it somewhere *away* from the user config directory
+(`-y /tmp`), choose the frontend (`-fpango`), choose the keymap
+(`--as=emacs`) and choose the file to open (`/tmp/T.hs`). This should
+succesfully start up Yi and ensure `M-x` and all such dynamic commands
+work. All in all, this gives you an environment allowing you to hack
+Yi with `nix-shell` as always even though it's spread across multiple
+repositories and has an unusual setup.
+
+Actually installing Yi with nix along with user config is a bit out of
+scope of this section but it works similarly, wrapping the binary into
+a script which sets `GHC_PACKAGE_PATH`.
+
+##### Automatic version tracking
+
+Here's an extra bit: manually tracking changing versions of the
+subrepositories can get pretty boring, pretty quickly. You can however
+use nix to automatically read the version from the cabal file and
+create the derivation based on the result. It ends up a bit ugly but
+it works. For `yi-rope` my `default.nix` is therefore
+
+```
+{ cabal, binary, deepseq, fingertree, hspec, QuickCheck
+, quickcheckInstances, text, criterion
+}:
+
+
+let pkgs = import <nixpkgs> {};
+    lib = pkgs.lib;
+    sr  = "/home/shana/programming/yi-rope";
+    file = builtins.readFile (sr + "/yi-rope.cabal");
+    strs = lib.strings.splitString "\n" file;
+    vstr = builtins.head (builtins.filter (s: lib.strings.hasPrefix "version:" s) strs);
+    vrsn = lib.strings.removePrefix "version:" (lib.strings.replaceChars [" "] [""] vstr);
+
+in
+cabal.mkDerivation (self: {
+  pname = "yi-rope";
+  version = vrsn;
+  src = sr;
+  buildDepends = [ binary deepseq fingertree text criterion ];
+  testDepends = [ hspec QuickCheck quickcheckInstances text ];
+  meta = {
+    description = "A rope data structure used by Yi";
+    license = self.stdenv.lib.licenses.gpl3;
+    platforms = self.ghc.meta.platforms;
+  };
+})
+```
+
+The downside is if you ever run `cabal2nix` over it, this scheme will
+get clobbered so it's mostly only useful for the repositories which
+will most likely not get many extra dependencies but are likely to
+change versions often.
 
 [ghproject]: https://github.com/yi-editor
