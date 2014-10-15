@@ -66,21 +66,21 @@ import qualified Data.ByteString.Lazy.Char8 as BS (ByteString(..))
 checkChallenge :: String -> YiM ()
 checkChallenge challenge = do
     vg <- io $ getVimgolfJSON challenge
-    withBuffer $ do buf <- readRegionB =<< regionOfB Document
-                    if ((R.toString buf) == ((getData . getOutput) vg))
-                    then replaceBufferContent "SUCCESS"
-                    else replaceBufferContent "FAILURE"
+    withCurrentBuffer $ do buf <- readRegionB =<< regionOfB Document
+                           if ((R.toString buf) == ((getData . getOutput) vg))
+                           then replaceBufferContent "SUCCESS"
+                           else replaceBufferContent "FAILURE"
 
 getChallenge :: String -> YiM ()
 getChallenge challenge = do
     vg <- io $ getVimgolfJSON challenge
     strFun "OUTPUT"
-    withBuffer $ insertN (R.fromString ((getData . getOutput) vg))
+    withCurrentBuffer $ insertN (R.fromString ((getData . getOutput) vg))
     withEditor splitE
     bufRef <- withEditor newTempBufferE
     strFun "INPUT"
-    withBuffer $ insertN (R.fromString ((getData . getInput) vg))
-    where strFun = withBuffer . assign identA . MemBuffer
+    withCurrentBuffer $ insertN (R.fromString ((getData . getInput) vg))
+    where strFun = withCurrentBuffer . assign identA . MemBuffer
 ~~~
 
 Putting all of this together, you would get this final file:
@@ -134,21 +134,21 @@ getVimgolfJSON str = do
 checkChallenge :: String -> YiM ()
 checkChallenge challenge = do
     vg <- io $ getVimgolfJSON challenge
-    withBuffer $ do buf <- readRegionB =<< regionOfB Document
-                    if ((R.toString buf) == ((getData . getOutput) vg))
-                    then replaceBufferContent "SUCCESS"
-                    else replaceBufferContent "FAILURE"
+    withCurrentBuffer $ do buf <- readRegionB =<< regionOfB Document
+                           if ((R.toString buf) == ((getData . getOutput) vg))
+                           then replaceBufferContent "SUCCESS"
+                           else replaceBufferContent "FAILURE"
 
 getChallenge :: String -> YiM ()
 getChallenge challenge = do
     vg <- io $ getVimgolfJSON challenge
     renameBuffer "OUTPUT"
-    withBuffer $ insertN (R.fromString ((getData . getOutput) vg))
+    withCurrentBuffer $ insertN (R.fromString ((getData . getOutput) vg))
     withEditor splitE
     bufRef <- withEditor newTempBufferE
     renameBuffer "INPUT"
-    withBuffer $ insertN (R.fromString ((getData . getInput) vg))
-    where renameBuffer = withBuffer . assign identA . MemBuffer
+    withCurrentBuffer $ insertN (R.fromString ((getData . getInput) vg))
+    where renameBuffer = withCurrentBuffer . assign identA . MemBuffer
 ~~~
 
 And finally, we need a way to call this from Yi. This can be done with a vim config as follows:
