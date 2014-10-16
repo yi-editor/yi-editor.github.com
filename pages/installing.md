@@ -73,7 +73,7 @@ to create an alias or small script for this, along the lines of:
 ```
 #!/usr/bin/env bash
 YI_DIR=$HOME/programming/yi/yi
-env CABAL_SANDBOX_CONFIG=$YI_DIR/cabal.sandbox.config cabal exec $YI_DIR/dist/build/yi/yi "$@"
+env CABAL_SANDBOX_CONFIG=$YI_DIR/cabal.sandbox.config cabal exec $YI_DIR/dist/build/yi/yi -- "$@"
 ```
 
 The `"$@"` part means that all the
