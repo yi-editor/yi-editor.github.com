@@ -57,13 +57,12 @@ you'll get config compilation errors due to missing modules.
 To sandbox, navigate to your source yi directory. For me it's
 `~/programming/yi/yi`.
 
-We then setup a cabal sandbox following instructions from the
-[cabal userguide](http://www.haskell.org/cabal/users-guide/installing-packages.html#sandboxes-basic-usage):
+We then setup a cabal sandbox:
 
 ```
 $ cabal sandbox init
 $ cabal install --only-dependencies
-$ cabal build
+$ cabal install
 ```
 
 From cabal-install 1.20, Yi can be launched in an environment using the
