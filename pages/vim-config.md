@@ -99,11 +99,15 @@ That should add a nice looking theme. You can of course customize the theme as y
 Now, finally, the most useful part. Custom keybindings. Vim users typically use nmap and imap to define custom keybindings. So let's deine nmap and imap ourselves, call those definitions part of boilerplate, and concentrate on what's important.
 
 ~~~ haskell
+{-# LANGUAGE OverloadedStrings #-}
+
 import Yi
 
 import qualified Yi.Keymap.Vim        as V2
 import qualified Yi.Keymap.Vim.Common as V2
 import qualified Yi.Keymap.Vim.Utils  as V2
+
+import           Data.Monoid ((<>), mappend)
 
 main = yi $ myConfig
 
@@ -114,7 +118,7 @@ myConfig = defaultVimConfig
 
 myKeymap = v2KeymapSet $ myBindings
 
-myBindings :: (String -> EditorM ()) -> [V2.VimBinding]
+myBindings :: (V2.EventString -> EditorM ()) -> [V2.VimBinding]
 myBindings eval =
   [ nmap  "<C-h>" previousTabE
   , nmap  "<C-l>" nextTabE
@@ -130,7 +134,6 @@ myBindings eval =
 
   , nmap  "<F3>" (withCurrentBuffer deleteTrailingSpaceB)
   , nmap  "<F4>" (withCurrentBuffer moveToSol)
-  , nmap  "<F1>" (withCurrentBuffer readCurrentWordB >>= printMsg)
 
   , imap  "<Home>" (withCurrentBuffer moveToSol)
   , imap  "<End>"  (withCurrentBuffer moveToEol)
@@ -141,7 +144,7 @@ v2KeymapSet :: ((V2.EventString -> EditorM ()) -> [V2.VimBinding]) -> KeymapSet
 v2KeymapSet myBindings = V2.mkKeymapSet $ V2.defVimConfig `override` \super this ->
     let eval = V2.pureEval this
     in super {
-          V2.vimBindings = myBindings eval ++ V2.vimBindings super
+          V2.vimBindings = myBindings eval <> V2.vimBindings super
         }
 
 nmap  x y = V2.mkStringBindingE V2.Normal V2.Drop (x, y, id)
@@ -155,7 +158,9 @@ nmap'  x y = V2.mkStringBindingY V2.Normal (x, y, id)
 leader :: V2.EventString -> V2.EventString
 leader = mappend "\\"
 --Boilerplate ends here
+
 ~~~
+
 
 And that's it. The nmap's and imap's look exactly like Vim's config! You don't need to bother about how nmap and imap are defined. With a little bit of boilerplate, you can start configuring Yi just like Vim.
 
@@ -168,6 +173,8 @@ Just to show you how easy it is to configure Yi, consider the following case.
 You want to modify the behavior of ```<C-a>``` in Vim by making the cursor stay at the same location, while still incrementing the number. You went ahead and looked at the source code for ```<C-a>``` which gave you ```getCountE >>= withCurrentBuffer . incrementNextNumberByB```. Using this, you can simple use function composition, to add ```savingPointB``` which saves the cursor location and makes sure the cursor moves back to that location after the function is executed. In our case, the function ```incrementNextNumberByB``` is what gets executed, and that's the function responsible for moving the cursor.
 
 ~~~ haskell
+{-# LANGUAGE OverloadedStrings #-}
+
 import Yi
 
 import qualified Yi.Keymap.Vim        as V2
@@ -176,16 +183,21 @@ import qualified Yi.Keymap.Vim.Utils  as V2
 
 import           Yi.Keymap.Vim.StateUtils (getCountE)
 
+import           Data.Monoid ((<>), mappend)
+
 main = yi $ myConfig
 
-myConfig = defaultVimConfig { defaultKm = myKeymap }
+myConfig = defaultVimConfig
+  { defaultKm = myKeymap
+  , configUI  = (configUI defaultVimConfig) { configWindowFill = '~' }
+  }
 
 myKeymap = v2KeymapSet $ myBindings
 
-myBindings :: (String -> EditorM ()) -> [V2.VimBinding]
+myBindings :: (V2.EventString -> EditorM ()) -> [V2.VimBinding]
 myBindings eval =
-  [ nmap  "<C-a>" (getCountE >>= withCurrentBuffer . savingPointB . incrementNextNumberByB)
-  , nmap  "<C-x>" (getCountE >>= withCurrentBuffer . savingPointB . incrementNextNumberByB . negate)
+  [ nmap  (leader "<C-a>") (getCountE >>= withCurrentBuffer . savingPointB . incrementNextNumberByB)
+  , nmap  (leader "<C-x>") (getCountE >>= withCurrentBuffer . savingPointB . incrementNextNumberByB . negate)
   ]
 
 -- Boilerplate begins here
@@ -193,7 +205,7 @@ v2KeymapSet :: ((V2.EventString -> EditorM ()) -> [V2.VimBinding]) -> KeymapSet
 v2KeymapSet myBindings = V2.mkKeymapSet $ V2.defVimConfig `override` \super this ->
     let eval = V2.pureEval this
     in super {
-          V2.vimBindings = myBindings eval ++ V2.vimBindings super
+          V2.vimBindings = myBindings eval <> V2.vimBindings super
         }
 
 nmap  x y = V2.mkStringBindingE V2.Normal V2.Drop (x, y, id)
@@ -207,6 +219,7 @@ nmap'  x y = V2.mkStringBindingY V2.Normal (x, y, id)
 leader :: V2.EventString -> V2.EventString
 leader = mappend "\\"
 --Boilerplate ends here
+
 ~~~
 
 That's how easy configuring Yi is. Simple function composition (of course, you should not mind looking at the source code first).
