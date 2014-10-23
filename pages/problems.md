@@ -96,7 +96,7 @@ extendedCuaKeymapSet = customizedCuaKeymapSet $
 
 -- A custom macro
 helloWorld :: YiM ()
-helloWorld = withBuffer $ insertN "Hello, world!"
+helloWorld = withCurrentBuffer $ insertN "Hello, world!"
 
 ~~~
 

@@ -9,7 +9,7 @@ Let's first show you an extension for Yi numbers with boilerplate in the yi.hs f
 
 Just to show you how easy it is to configure Yi, consider the following case.
 
-You want to modify the behavior of ```<C-a>``` in Vim by making the cursor stay at the same location, while still incrementing the number. You went ahead and looked at the source code for ```<C-a>``` which gave you ```getCountE >>= withBuffer0 . incrementNextNumberByB```. Using this, you can simple use function composition, to add ```savingPointB``` which saves the cursor location and makes sure the cursor moves back to that location after the function is executed. In our case, the function ```incrementNextNumberByB``` is what gets executed, and that's the function responsible for moving the cursor.
+You want to modify the behavior of ```<C-a>``` in Vim by making the cursor stay at the same location, while still incrementing the number. You went ahead and looked at the source code for ```<C-a>``` which gave you ```getCountE >>= withCurrentBuffer . incrementNextNumberByB```. Using this, you can simple use function composition, to add ```savingPointB``` which saves the cursor location and makes sure the cursor moves back to that location after the function is executed. In our case, the function ```incrementNextNumberByB``` is what gets executed, and that's the function responsible for moving the cursor.
 
 ~~~ haskell
 {-# LANGUAGE OverloadedStrings #-}
@@ -29,8 +29,8 @@ myKeymap = v2KeymapSet $ myBindings
 
 myBindings :: (V2.EventString -> EditorM ()) -> [V2.VimBinding]
 myBindings eval =
-  [ nmap  "\\<C-a>" (getCountE >>= withBuffer0 . savingPointB . incrementNextNumberByB)
-  , nmap  "\\<C-x>" (getCountE >>= withBuffer0 . savingPointB . incrementNextNumberByB . negate)
+  [ nmap  "\\<C-a>" ((getCountE >>= withCurrentBuffer . savingPointB . incrementNextNumberByB) :: EditorM ())
+  , nmap  "\\<C-x>" ((getCountE >>= withCurrentBuffer . savingPointB . incrementNextNumberByB . negate) :: EditorM ())
   ]
 
 -- Boilerplate begins here
@@ -117,8 +117,8 @@ myKeymap = v2KeymapSet $ myBindings
 
 myBindings :: (V2.EventString -> EditorM ()) -> [V2.VimBinding]
 myBindings eval =
-  [ nmap  (leader "<C-a>") (getCountE >>= withBuffer0 . savingPointB . incrementNextNumberByB)
-  , nmap  (leader "<C-x>") (getCountE >>= withBuffer0 . savingPointB . incrementNextNumberByB . negate)
+  [ nmap  (leader "<C-a>") ((getCountE >>= withCurrentBuffer . savingPointB . incrementNextNumberByB) :: EditorM ())
+  , nmap  (leader "<C-x>") ((getCountE >>= withCurrentBuffer . savingPointB . incrementNextNumberByB . negate) :: EditorM ())
   ]
 ~~~
 
