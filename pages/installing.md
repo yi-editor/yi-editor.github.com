@@ -13,7 +13,7 @@ With the Haskell Platform installed, yi should be installed with cabal-install:
 
 On Linux systems, you'll probably need ncurses development headers for
 the Vty frontend. On Ubuntu, you'll need to install the
-`libncurses5-dev` package.
+`libncurses5-dev` package. Also, `libicu-dev` on Ubuntu would be required for unicode support.
 
 You can specify frontends to compile, also:
 
