@@ -1,0 +1,130 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Release notes - Yi</title>
+
+  <link rel="stylesheet" type="text/css" href="../css/default.css" />
+
+  <!-- jQuery & jQueryUI -->
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css" />
+
+  <!-- Pandoc Style CSS -->
+  <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+  <!-- TOCify -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="../css/tocify.css" />
+
+</head>
+
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="../">Yi</a>
+    </div>
+    <div class="navbar-collapse collapse navbar-right">
+      <ul class="nav navbar-nav">
+	<!-- TODO: Take in a list and loop through it -->
+	<li><a href="../">Home</a></li>
+	<li><a href="../pages/about.html">About</a></li>
+	<li><a href="../pages/installing.html">Install</a></li>
+	<li><a href="../pages/contact.html">Contact</a></li>
+	<li><a href="../archive.html">Archive</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+    <div id="content" class="container">
+        <h1>Release notes</h1>
+
+        <div class="row">
+  <div class="hidden-xs col-sm-4 col-md-4">
+    Contents:<br />
+    <div id="toc"></div>
+  </div>
+  <div class="col-xs-12 col-sm-8 col-md-8" id="page-content">
+    <h1 id="yi-0.6.3-release-notes">Yi 0.6.3 Release Notes</h1>
+<h2 id="whats-new">What’s new?</h2>
+<ul>
+<li>New vte UI. This is a terminal UI inside a GUI, much like gvim. It depends on Gtk2Hs for the GUI, and then launches the vty UI inside the terminal.</li>
+<li>Compatibility with the latest Haskell Platform release</li>
+<li>Start yi-contrib package. We intend to move more stuff here, to clean up the core yi package.</li>
+</ul>
+<h2 id="yi">Yi</h2>
+<p>Yi is a text editor written in Haskell and extensible in Haskell. The long-term goal of the Yi project is to provide the editor of choice for Haskell programmers.</p>
+<p>Yi now works relatively well in the terminal, using the vty package, and also has Gtk frontends using vte (which interfaces with the terminal interface) and a Pango frontend. There is also a Cocoa frontend under (slow) development.</p>
+<h2 id="installation">Installation</h2>
+<p>Using cabal install:</p>
+<pre><code>$ cabal update
+$ cabal install yi</code></pre>
+<p>The default UI depends on the vty package, which will only compile with the ncurses development headers available. On Ubuntu, you need to install the <code>libncurses5-dev</code> package.</p>
+<p>On Windows, you’ll need to disable the default vty terminal UI, and use a Gtk UI instead (the vte UI requires vty, so you can’t install that either):</p>
+<pre><code>$ cabal install yi -f-vty -fpango</code></pre>
+<p>(Windows support is not well-tested, though.)</p>
+<p>Optionally also install the contrib package:</p>
+<pre><code>$ cabal install yi-contrib</code></pre>
+<h2 id="features">Features</h2>
+<ul>
+<li>A purely functional editor core</li>
+<li>Key-bindings written as parsers of the input</li>
+<li>Emacs, Vim and (partial) Cua emulations provided by default</li>
+<li>Console front-end (Gtk2Hs and Cocoa front-ends in development)</li>
+<li>Static configuration (XMonad style) for fast load</li>
+<li>Haskell support:</li>
+<li>Lexical highlighting and (unicode-based) beautification.</li>
+<li>Layout-aware parenthesis-matching</li>
+<li>Auto-indentation</li>
+<li>cabal-build within the editor</li>
+<li>Syntax highlighting for a number of other languages (latex, python, perl, …)</li>
+</ul>
+<h2 id="more-info">More Info</h2>
+<p>Read the <a href="https://github.com/yi-editor/yi/blob/master/README.md">README</a> on GitHub for more information. The <a href="https://github.com/yi-editor/yi">source code</a> is also hosted there.</p>
+<h2 id="credits">Credits</h2>
+<p>This release is brought to you by:</p>
+<ul>
+<li>Alexey Levan</li>
+<li>Gwern Branwen</li>
+<li>Issac Trotts</li>
+<li>Jean-Philippe Bernardy</li>
+<li>Jeff Wheeler</li>
+<li>Jeremy Wall</li>
+<li>Maciej Piechotka</li>
+<li>Malte Sommerkorn</li>
+</ul>
+<p>and all the contributors to the previous versions.</p>
+<p>Also, Yi would not exist without all the work put into the Haskell platform.</p>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $("#toc").tocify({context: "#page-content", selectors: "h1, h2, h3"});
+  });
+</script>
+
+    </div>
+    <div id="footer">
+  Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+  <p>Copyright (C) 2015, Yi developers</p>
+</div>
+
+  </body>
+</html>

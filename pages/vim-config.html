@@ -1,0 +1,263 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Vim configuration - Yi</title>
+
+  <link rel="stylesheet" type="text/css" href="../css/default.css" />
+
+  <!-- jQuery & jQueryUI -->
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css" />
+
+  <!-- Pandoc Style CSS -->
+  <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+  <!-- TOCify -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="../css/tocify.css" />
+
+</head>
+
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="../">Yi</a>
+    </div>
+    <div class="navbar-collapse collapse navbar-right">
+      <ul class="nav navbar-nav">
+	<!-- TODO: Take in a list and loop through it -->
+	<li><a href="../">Home</a></li>
+	<li><a href="../pages/about.html">About</a></li>
+	<li><a href="../pages/installing.html">Install</a></li>
+	<li><a href="../pages/contact.html">Contact</a></li>
+	<li><a href="../archive.html">Archive</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+    <div id="content" class="container">
+        <h1>Vim configuration</h1>
+
+        <div class="row">
+  <div class="hidden-xs col-sm-4 col-md-4">
+    Contents:<br />
+    <div id="toc"></div>
+  </div>
+  <div class="col-xs-12 col-sm-8 col-md-8" id="page-content">
+    <p>The simplest Vim configuration you can start with is as follows:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Yi</span>
+
+main <span class="fu">=</span> yi <span class="fu">$</span> defaultVimConfig</code></pre></div>
+<p>Basically, importing <code>Yi</code> imports all the modules required to get started. <code>defaultVimConfig</code> sets the default Vim config.</p>
+<p>Let’s first refactor our config.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Yi</span>
+
+main <span class="fu">=</span> yi <span class="fu">$</span> myConfig
+
+myConfig <span class="fu">=</span> defaultVimConfig</code></pre></div>
+<p>Now, the nice part about being extensible in Haskell, is the ease of configuration. <code>defaultVimConfiguration</code> uses Haskell’s record syntax. Don’t worry if you don’t understand what that means. Basically, you can express the configuration more verbosely as follows:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Yi</span>
+
+main <span class="fu">=</span> yi <span class="fu">$</span> myConfig
+
+myConfig <span class="fu">=</span> defaultVimConfig
+    { defaultKm <span class="fu">=</span> defaultKm defaultVimConfig
+    , configUI <span class="fu">=</span> configUI defaultVimConfig
+    }</code></pre></div>
+<p>We haven’t really changed anything, but now we’re being more explicit about the fields in the config file. We’ve only listed two fields, <code>defaultKm</code> which sets the keymap, and <code>configUI</code> which sets the UI. There are actually many more fields to defaultVimConfig, but right now we only care about these two fields.</p>
+<p>Let’s make a small change. We want our UI to look more like Vim’s, so we edit the configUI field:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Yi</span>
+
+main <span class="fu">=</span> yi <span class="fu">$</span> myConfig
+
+myConfig <span class="fu">=</span> defaultVimConfig
+    { defaultKm <span class="fu">=</span> defaultKm defaultVimConfig
+    , configUI <span class="fu">=</span> (configUI defaultVimConfig) { configWindowFill <span class="fu">=</span> <span class="ch">'~'</span> }
+    }</code></pre></div>
+<p>The parenthesis there was needed to make sure the value of configUI is modified. Again, we’re able to edit <code>configWindowFill</code> thanks to Haskell’s record syntax.</p>
+<p>Now we have ~ signs on every line except the first. Feels much more like vim. But we can do better.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Yi</span>
+
+<span class="kw">import </span><span class="dt">Yi.Style</span> (<span class="dt">Color</span>(<span class="dt">Default</span>))
+
+<span class="kw">import </span><span class="dt">Data.Monoid</span> ((&lt;&gt;))
+
+main <span class="fu">=</span> yi <span class="fu">$</span> myConfig
+
+myConfig <span class="fu">=</span> defaultVimConfig
+  { defaultKm <span class="fu">=</span> defaultKm defaultVimConfig
+  , configUI  <span class="fu">=</span> (configUI defaultVimConfig) { configWindowFill <span class="fu">=</span> <span class="ch">'~'</span>
+                                            , configTheme      <span class="fu">=</span> myTheme
+                                            }
+  }
+
+<span class="ot">defaultColor ::</span> <span class="dt">Yi.Style.Color</span>
+defaultColor <span class="fu">=</span> <span class="dt">Yi.Style.Default</span>
+
+myTheme <span class="fu">=</span> defaultTheme <span class="ot">`override`</span> \super _ <span class="ot">-&gt;</span> super
+  { modelineAttributes   <span class="fu">=</span> emptyAttributes { foreground <span class="fu">=</span> black,   background <span class="fu">=</span> darkcyan }
+  , tabBarAttributes     <span class="fu">=</span> emptyAttributes { foreground <span class="fu">=</span> white,   background <span class="fu">=</span> defaultColor }
+  , baseAttributes       <span class="fu">=</span> emptyAttributes { foreground <span class="fu">=</span> defaultColor, background <span class="fu">=</span> defaultColor, bold <span class="fu">=</span> <span class="dt">True</span> }
+  , commentStyle         <span class="fu">=</span> withFg darkred <span class="fu">&lt;&gt;</span> withBd <span class="dt">False</span> <span class="fu">&lt;&gt;</span> withItlc <span class="dt">True</span>
+  , selectedStyle        <span class="fu">=</span> withReverse <span class="dt">True</span>
+  , errorStyle           <span class="fu">=</span> withBg red   <span class="fu">&lt;&gt;</span> withFg white
+  , operatorStyle        <span class="fu">=</span> withFg brown <span class="fu">&lt;&gt;</span> withBd <span class="dt">False</span>
+  , hintStyle            <span class="fu">=</span> withBg brown <span class="fu">&lt;&gt;</span> withFg black
+  , importStyle          <span class="fu">=</span> withFg blue
+  , dataConstructorStyle <span class="fu">=</span> withFg blue
+  , typeStyle            <span class="fu">=</span> withFg blue
+  , keywordStyle         <span class="fu">=</span> withFg yellow
+  , builtinStyle         <span class="fu">=</span> withFg brown
+  , strongHintStyle      <span class="fu">=</span> withBg brown <span class="fu">&lt;&gt;</span> withUnderline <span class="dt">True</span>
+  , stringStyle          <span class="fu">=</span> withFg brown <span class="fu">&lt;&gt;</span> withBd <span class="dt">False</span>
+  , preprocessorStyle    <span class="fu">=</span> withFg blue
+  }</code></pre></div>
+<p>That should add a nice looking theme. You can of course customize the theme as you like.</p>
+<p>Now, finally, the most useful part. Custom keybindings. Vim users typically use nmap and imap to define custom keybindings. So let’s deine nmap and imap ourselves, call those definitions part of boilerplate, and concentrate on what’s important.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE OverloadedStrings #-}</span>
+
+<span class="kw">import </span><span class="dt">Yi</span>
+
+<span class="kw">import qualified</span> <span class="dt">Yi.Keymap.Vim</span>        <span class="kw">as</span> <span class="dt">V2</span>
+<span class="kw">import qualified</span> <span class="dt">Yi.Keymap.Vim.Common</span> <span class="kw">as</span> <span class="dt">V2</span>
+<span class="kw">import qualified</span> <span class="dt">Yi.Keymap.Vim.Utils</span>  <span class="kw">as</span> <span class="dt">V2</span>
+
+<span class="kw">import           </span><span class="dt">Data.Monoid</span> ((&lt;&gt;), mappend)
+
+main <span class="fu">=</span> yi <span class="fu">$</span> myConfig
+
+myConfig <span class="fu">=</span> defaultVimConfig
+  { defaultKm <span class="fu">=</span> myKeymap
+  , configUI  <span class="fu">=</span> (configUI defaultVimConfig) { configWindowFill <span class="fu">=</span> <span class="ch">'~'</span> }
+  }
+
+myKeymap <span class="fu">=</span> v2KeymapSet <span class="fu">$</span> myBindings
+
+<span class="ot">myBindings ::</span> (<span class="dt">V2.EventString</span> <span class="ot">-&gt;</span> <span class="dt">EditorM</span> ()) <span class="ot">-&gt;</span> [<span class="dt">V2.VimBinding</span>]
+myBindings eval <span class="fu">=</span>
+  [ nmap  <span class="st">&quot;&lt;C-h&gt;&quot;</span> previousTabE
+  , nmap  <span class="st">&quot;&lt;C-l&gt;&quot;</span> nextTabE
+
+  <span class="co">-- Press space to clear incremental search highlight</span>
+  , nmap  <span class="st">&quot; &quot;</span> (eval <span class="st">&quot;:nohlsearch&lt;CR&gt;&quot;</span>)
+
+  <span class="co">-- for times when you don't press shift hard enough</span>
+  , nmap  <span class="st">&quot;;&quot;</span> (eval <span class="st">&quot;:&quot;</span>)
+
+  <span class="co">-- Vim's behavior of Y, for historical reasons.</span>
+  , nmap <span class="st">&quot;Y&quot;</span> (eval <span class="st">&quot;yy&quot;</span>)
+
+  , nmap  <span class="st">&quot;&lt;F3&gt;&quot;</span> (withCurrentBuffer deleteTrailingSpaceB)
+  , nmap  <span class="st">&quot;&lt;F4&gt;&quot;</span> (withCurrentBuffer moveToSol)
+
+  , imap  <span class="st">&quot;&lt;Home&gt;&quot;</span> (withCurrentBuffer moveToSol)
+  , imap  <span class="st">&quot;&lt;End&gt;&quot;</span>  (withCurrentBuffer moveToEol)
+  ]
+
+<span class="co">-- Boilerplate begins here</span>
+<span class="ot">v2KeymapSet ::</span> ((<span class="dt">V2.EventString</span> <span class="ot">-&gt;</span> <span class="dt">EditorM</span> ()) <span class="ot">-&gt;</span> [<span class="dt">V2.VimBinding</span>]) <span class="ot">-&gt;</span> <span class="dt">KeymapSet</span>
+v2KeymapSet myBindings <span class="fu">=</span> V2.mkKeymapSet <span class="fu">$</span> V2.defVimConfig <span class="ot">`override`</span> \super this <span class="ot">-&gt;</span>
+    <span class="kw">let</span> eval <span class="fu">=</span> V2.pureEval this
+    <span class="kw">in</span> super {
+          V2.vimBindings <span class="fu">=</span> myBindings eval <span class="fu">&lt;&gt;</span> V2.vimBindings super
+        }
+
+nmap  x y <span class="fu">=</span> V2.mkStringBindingE <span class="dt">V2.Normal</span> <span class="dt">V2.Drop</span> (x, y, id)
+imap  x y <span class="fu">=</span> <span class="dt">V2.VimBindingE</span> (\evs state <span class="ot">-&gt;</span> <span class="kw">case</span> V2.vsMode state <span class="kw">of</span>
+                            <span class="dt">V2.Insert</span> _ <span class="ot">-&gt;</span>
+                                fmap (const (y <span class="fu">&gt;&gt;</span> return <span class="dt">V2.Continue</span>))
+                                     (evs <span class="ot">`V2.matchesString`</span> x)
+                            _ <span class="ot">-&gt;</span> <span class="dt">V2.NoMatch</span>)
+nmap'  x y <span class="fu">=</span> V2.mkStringBindingY <span class="dt">V2.Normal</span> (x, y, id)
+
+<span class="ot">leader ::</span> <span class="dt">V2.EventString</span> <span class="ot">-&gt;</span> <span class="dt">V2.EventString</span>
+leader <span class="fu">=</span> mappend <span class="st">&quot;\\&quot;</span>
+<span class="co">--Boilerplate ends here</span></code></pre></div>
+<p>And that’s it. The nmap’s and imap’s look exactly like Vim’s config! You don’t need to bother about how nmap and imap are defined. With a little bit of boilerplate, you can start configuring Yi just like Vim.</p>
+<p>The above config (including the theme) is a simplified version of <a href="https://github.com/yi-editor/yi/blob/master/yi-contrib/src/Yi/Config/Users/Michal.hs">Michal’s config</a></p>
+<h3 id="extending-vim-numbers">Extending Vim numbers</h3>
+<p>Just to show you how easy it is to configure Yi, consider the following case.</p>
+<p>You want to modify the behavior of <code>&lt;C-a&gt;</code> in Vim by making the cursor stay at the same location, while still incrementing the number. You went ahead and looked at the source code for <code>&lt;C-a&gt;</code> which gave you <code>getCountE &gt;&gt;= withCurrentBuffer . incrementNextNumberByB</code>. Using this, you can simple use function composition, to add <code>savingPointB</code> which saves the cursor location and makes sure the cursor moves back to that location after the function is executed. In our case, the function <code>incrementNextNumberByB</code> is what gets executed, and that’s the function responsible for moving the cursor.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE OverloadedStrings #-}</span>
+
+<span class="kw">import </span><span class="dt">Yi</span>
+
+<span class="kw">import qualified</span> <span class="dt">Yi.Keymap.Vim</span>        <span class="kw">as</span> <span class="dt">V2</span>
+<span class="kw">import qualified</span> <span class="dt">Yi.Keymap.Vim.Common</span> <span class="kw">as</span> <span class="dt">V2</span>
+<span class="kw">import qualified</span> <span class="dt">Yi.Keymap.Vim.Utils</span>  <span class="kw">as</span> <span class="dt">V2</span>
+
+<span class="kw">import           </span><span class="dt">Yi.Keymap.Vim.StateUtils</span> (getCountE)
+
+<span class="kw">import           </span><span class="dt">Data.Monoid</span> ((&lt;&gt;), mappend)
+
+main <span class="fu">=</span> yi <span class="fu">$</span> myConfig
+
+myConfig <span class="fu">=</span> defaultVimConfig
+  { defaultKm <span class="fu">=</span> myKeymap
+  , configUI  <span class="fu">=</span> (configUI defaultVimConfig) { configWindowFill <span class="fu">=</span> <span class="ch">'~'</span> }
+  }
+
+myKeymap <span class="fu">=</span> v2KeymapSet <span class="fu">$</span> myBindings
+
+<span class="ot">myBindings ::</span> (<span class="dt">V2.EventString</span> <span class="ot">-&gt;</span> <span class="dt">EditorM</span> ()) <span class="ot">-&gt;</span> [<span class="dt">V2.VimBinding</span>]
+myBindings eval <span class="fu">=</span>
+  [ nmap  (leader <span class="st">&quot;&lt;C-a&gt;&quot;</span>) (getCountE <span class="fu">&gt;&gt;=</span> withCurrentBuffer <span class="fu">.</span> savingPointB <span class="fu">.</span> incrementNextNumberByB)
+  , nmap  (leader <span class="st">&quot;&lt;C-x&gt;&quot;</span>) (getCountE <span class="fu">&gt;&gt;=</span> withCurrentBuffer <span class="fu">.</span> savingPointB <span class="fu">.</span> incrementNextNumberByB <span class="fu">.</span> negate)
+  ]
+
+<span class="co">-- Boilerplate begins here</span>
+<span class="ot">v2KeymapSet ::</span> ((<span class="dt">V2.EventString</span> <span class="ot">-&gt;</span> <span class="dt">EditorM</span> ()) <span class="ot">-&gt;</span> [<span class="dt">V2.VimBinding</span>]) <span class="ot">-&gt;</span> <span class="dt">KeymapSet</span>
+v2KeymapSet myBindings <span class="fu">=</span> V2.mkKeymapSet <span class="fu">$</span> V2.defVimConfig <span class="ot">`override`</span> \super this <span class="ot">-&gt;</span>
+    <span class="kw">let</span> eval <span class="fu">=</span> V2.pureEval this
+    <span class="kw">in</span> super {
+          V2.vimBindings <span class="fu">=</span> myBindings eval <span class="fu">&lt;&gt;</span> V2.vimBindings super
+        }
+
+nmap  x y <span class="fu">=</span> V2.mkStringBindingE <span class="dt">V2.Normal</span> <span class="dt">V2.Drop</span> (x, y, id)
+imap  x y <span class="fu">=</span> <span class="dt">V2.VimBindingE</span> (\evs state <span class="ot">-&gt;</span> <span class="kw">case</span> V2.vsMode state <span class="kw">of</span>
+                            <span class="dt">V2.Insert</span> _ <span class="ot">-&gt;</span>
+                                fmap (const (y <span class="fu">&gt;&gt;</span> return <span class="dt">V2.Continue</span>))
+                                     (evs <span class="ot">`V2.matchesString`</span> x)
+                            _ <span class="ot">-&gt;</span> <span class="dt">V2.NoMatch</span>)
+nmap'  x y <span class="fu">=</span> V2.mkStringBindingY <span class="dt">V2.Normal</span> (x, y, id)
+
+<span class="ot">leader ::</span> <span class="dt">V2.EventString</span> <span class="ot">-&gt;</span> <span class="dt">V2.EventString</span>
+leader <span class="fu">=</span> mappend <span class="st">&quot;\\&quot;</span>
+<span class="co">--Boilerplate ends here</span></code></pre></div>
+<p>That’s how easy configuring Yi is. Simple function composition (of course, you should not mind looking at the source code first).</p>
+<h3 id="removing-boilerplate">Removing Boilerplate</h3>
+<p>See the section, Modularizing the config, for details on moving the boilerplate outside the yi.hs config file. In short, files that need to be imported can be placed in the <code>.config/yi/lib</code> directory.</p>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $("#toc").tocify({context: "#page-content", selectors: "h1, h2, h3"});
+  });
+</script>
+
+    </div>
+    <div id="footer">
+  Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+  <p>Copyright (C) 2015, Yi developers</p>
+</div>
+
+  </body>
+</html>

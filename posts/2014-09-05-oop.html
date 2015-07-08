@@ -1,0 +1,112 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Prototypes - Encoding Object Oriented inheritance in Haskell - Yi</title>
+
+  <link rel="stylesheet" type="text/css" href="../css/default.css" />
+
+  <!-- jQuery & jQueryUI -->
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css" />
+
+  <!-- Pandoc Style CSS -->
+  <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+  <!-- TOCify -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="../css/tocify.css" />
+
+</head>
+
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="../">Yi</a>
+    </div>
+    <div class="navbar-collapse collapse navbar-right">
+      <ul class="nav navbar-nav">
+	<!-- TODO: Take in a list and loop through it -->
+	<li><a href="../">Home</a></li>
+	<li><a href="../pages/about.html">About</a></li>
+	<li><a href="../pages/installing.html">Install</a></li>
+	<li><a href="../pages/contact.html">Contact</a></li>
+	<li><a href="../archive.html">Archive</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+    <div id="content" class="container">
+        <h1>Prototypes - Encoding Object Oriented inheritance in Haskell</h1>
+
+        <div class="info">
+    Posted on September  5, 2014
+    
+        by Jeanphilippe Bernardy
+    
+</div>
+
+<p>In this post I will sketch an encoding for OO-style inheritance in Haskell, and show how this is used to in Yi to write code that can be customized.</p>
+<p>This can also serve as an introduction to the concepts defined in module Data.Prototype (currently found in Yi sources)</p>
+<h2 id="inheritance">Inheritance</h2>
+<p>Inheritance can create structures which are difficult to understand. Since a given method call can call dispatch to a number of methods at run-time, tracking what is going on might be tricky. Sometimes however, inheritance is exactly the construct we need.</p>
+<p>Imagine you have the following piece of code:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">a ::</span> <span class="dt">A</span>
+a <span class="fu">=</span> fa b c
+
+<span class="ot">b ::</span> <span class="dt">B</span>
+b <span class="fu">=</span> fb a c
+
+<span class="ot">c ::</span> <span class="dt">C</span>
+c <span class="fu">=</span> fc a b</code></pre></div>
+<p>That is, <code>a</code>, <code>b</code> and <code>c</code> are values defined in terms of each other.</p>
+<p>You would like users to be able to customize <code>a</code>’s value. However, if the change actually occurs in the definition of <code>c</code>, you don’t want them to copy-paste the whole set of definitions. It would be preferable to amend only the definition for <code>c</code> and reuse the rest. Unfortunately, <code>a</code>’s value is <em>closed</em>, so this is not possible.</p>
+<p>This situation seems to cry for inheritance. In an object oriented language, the solution is obvious: make <code>a</code>, <code>b</code> and <code>c</code> methods of a class. The user can then inherit it and override the definition of <code>c</code>.</p>
+<p>In Yi, color themes have a similar structure: specific styles are defined in terms of base styles. If a user changes a base style, the change should be reflected automatically in all the styles that derive from it. As in the toy example above, we do not want the user to redefine everything from the ground up.</p>
+<p>So, what can we do, since Haskell lacks inheritance?</p>
+<h2 id="encoding-prototypes">Encoding prototypes</h2>
+<p>All is not lost! <a href="http://www.cis.upenn.edu/~bcpierce/tapl/index.html">Pierce (TAPL, paragraph 18.10)</a> has taught us that inheritance can be encoded as <em>open recursion</em>. The trick is to make the reference to the <code>self</code> object explicit. We can do so in Haskell by putting the definitions in a record and a lambda.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Proto</span> <span class="fu">=</span> <span class="dt">Proto</span> {<span class="ot">a ::</span> <span class="dt">A</span>,<span class="ot"> b ::</span> <span class="dt">B</span>,<span class="ot"> c ::</span> <span class="dt">C</span>}
+proto <span class="fu">=</span> \self <span class="ot">-&gt;</span> <span class="dt">Proto</span> {
+  a <span class="fu">=</span> fa (b self) (c self),
+  b <span class="fu">=</span> fb (a self) (c self),
+  c <span class="fu">=</span> fc (a self) (b self)
+ }</code></pre></div>
+<p>We can retrieve our original definitions by taking the fix-point:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">abc <span class="fu">=</span> fix proto</code></pre></div>
+<p>Of course, this works only because Haskell is lazy (and because the original definition did not introduce an infinite recursion in the first place). If the fields of the record are marked strict, this ceases to work.</p>
+<p>Given that definition, it is easy to customize the value as follows:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">customizedProto <span class="fu">=</span> \self <span class="ot">-&gt;</span> proto self {
+   c <span class="fu">=</span> userFunction (a self) (b self)
+ }
+
+customizedABC <span class="fu">=</span> fix customizedProto</code></pre></div>
+<p>The <code>Data.Prototype</code> module generalizes this example, and defines types and functions to corresponding to the prototype and inheritance abstractions.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Yi is intended to be highly customizable. In many instances, we can use compositional abstractions to provide customization. In some other instances, we prefer to provide a prototype that user can patch.</p>
+<p>Despite Haskell lacking inheritance, we see that the basic concepts of lambda expression and lazy evaluation can be combined to provide a very lightweight encoding for prototypes, and we take advantage of this in Yi.</p>
+
+    </div>
+    <div id="footer">
+  Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+  <p>Copyright (C) 2015, Yi developers</p>
+</div>
+
+  </body>
+</html>

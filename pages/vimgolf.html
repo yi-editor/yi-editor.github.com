@@ -1,0 +1,252 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Vimgolf client - Yi</title>
+
+  <link rel="stylesheet" type="text/css" href="../css/default.css" />
+
+  <!-- jQuery & jQueryUI -->
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css" />
+
+  <!-- Pandoc Style CSS -->
+  <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+  <!-- TOCify -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="../css/tocify.css" />
+
+</head>
+
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="../">Yi</a>
+    </div>
+    <div class="navbar-collapse collapse navbar-right">
+      <ul class="nav navbar-nav">
+	<!-- TODO: Take in a list and loop through it -->
+	<li><a href="../">Home</a></li>
+	<li><a href="../pages/about.html">About</a></li>
+	<li><a href="../pages/installing.html">Install</a></li>
+	<li><a href="../pages/contact.html">Contact</a></li>
+	<li><a href="../archive.html">Archive</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+    <div id="content" class="container">
+        <h1>Vimgolf client</h1>
+
+        <div class="row">
+  <div class="hidden-xs col-sm-4 col-md-4">
+    Contents:<br />
+    <div id="toc"></div>
+  </div>
+  <div class="col-xs-12 col-sm-8 col-md-8" id="page-content">
+    <p>You might have heard that Yi being extensible in Haskell offers the ability to use existing Haskell libraries. In this page, I’ll demonstrate the extensibility of Yi by writing a Vimgolf client. The client is very rudimentary, being able to get the required output, and the starting text. From there, the user can modify the starting text, and if the user succeeds, the buffer text is changed to <code>success</code>, else, the buffer text is changed to <code>failure</code>.</p>
+<p>First, we need to get JSON data from vimgolf. This typically has the format <code>&quot;http://vimgolf.com/challenges/&quot; ++ challenge-id ++ &quot;.json&quot;</code>. We can use http-conduit to fetch this using http. Let’s start with just this much. Create a file <code>~/.config/yi/lib/Vimgolf.hs</code> and put the following in the file:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE OverloadedStrings #-}</span>
+<span class="kw">module</span> <span class="dt">Vimgolf</span> <span class="kw">where</span>
+
+<span class="kw">import qualified</span> <span class="dt">Data.ByteString.Lazy.Char8</span> <span class="kw">as</span> <span class="dt">BS</span> (<span class="dt">ByteString</span>(..))
+<span class="kw">import           </span><span class="dt">Network.HTTP.Conduit</span>             (simpleHttp)
+
+<span class="ot">getJSON ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">BS.ByteString</span>
+getJSON challenge <span class="fu">=</span> simpleHttp (<span class="st">&quot;http://vimgolf.com/challenges/&quot;</span> <span class="fu">++</span> challenge <span class="fu">++</span> <span class="st">&quot;.json&quot;</span>)</code></pre></div>
+<p>Now that we have a way of getting the json data, let’s convert that to haskell’s record syntax so that it would become useful. You can have a look at vimgolf’s json data to make sense out of this. An example is <a href="http://vimgolf.com/challenges/540629666a1e4000020d9e5a.json">here</a>. You would need to add the following to convert to Haskell’s record syntax. This should be familiar to you if you are used to the Aeson library for JSON parsing.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import           </span><span class="dt">Control.Applicative</span>              ((&lt;$&gt;), (&lt;*&gt;))
+<span class="kw">import           </span><span class="dt">Data.Aeson</span>                       ((.:), <span class="dt">FromJSON</span>(..), eitherDecode, <span class="dt">Value</span>(..))
+
+<span class="kw">data</span> <span class="dt">VGTopLevel</span> <span class="fu">=</span> <span class="dt">VGTopLevel</span> {<span class="ot"> getInput  ::</span> <span class="dt">VGData</span>
+                             ,<span class="ot"> getOutput ::</span> <span class="dt">VGData</span>
+                             ,<span class="ot"> vimRC     ::</span> <span class="dt">String</span>
+                             ,<span class="ot"> client    ::</span> <span class="dt">String</span>
+                             } <span class="kw">deriving</span> (<span class="dt">Show</span>)
+
+<span class="kw">data</span> <span class="dt">VGData</span> <span class="fu">=</span> <span class="dt">VGData</span> {<span class="ot"> getData ::</span> <span class="dt">String</span>
+                     ,<span class="ot"> getType ::</span> <span class="dt">String</span>
+                     } <span class="kw">deriving</span> (<span class="dt">Show</span>)
+
+<span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">VGTopLevel</span> <span class="kw">where</span>
+    parseJSON (<span class="dt">Object</span> v) <span class="fu">=</span> <span class="dt">VGTopLevel</span> <span class="fu">&lt;$&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;in&quot;</span>
+                                      <span class="fu">&lt;*&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;out&quot;</span>
+                                      <span class="fu">&lt;*&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;vimrc&quot;</span>
+                                      <span class="fu">&lt;*&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;client&quot;</span>
+
+<span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">VGData</span> <span class="kw">where</span>
+    parseJSON (<span class="dt">Object</span> v) <span class="fu">=</span> <span class="dt">VGData</span> <span class="fu">&lt;$&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;data&quot;</span>
+                                  <span class="fu">&lt;*&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;type&quot;</span>
+
+<span class="ot">getVimgolfJSON ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">VGTopLevel</span>
+getVimgolfJSON str <span class="fu">=</span> <span class="kw">do</span>
+    d <span class="ot">&lt;-</span> (eitherDecode <span class="fu">&lt;$&gt;</span> getJSON str)<span class="ot"> ::</span> <span class="dt">IO</span> (<span class="dt">Either</span> <span class="dt">String</span> <span class="dt">VGTopLevel</span>)
+    <span class="kw">case</span> d <span class="kw">of</span>
+        <span class="dt">Left</span> err <span class="ot">-&gt;</span> error <span class="st">&quot;FAIL&quot;</span>
+        <span class="dt">Right</span> vg <span class="ot">-&gt;</span> return vg</code></pre></div>
+<p>And lastly, you would need make this accessible in Yi. This can be done by adding the following:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import           </span><span class="dt">Yi</span>
+<span class="kw">import qualified</span> <span class="dt">Yi.Rope</span> <span class="kw">as</span> <span class="dt">R</span> (toString, fromString)
+<span class="kw">import           </span><span class="dt">Yi.Utils</span>     (io)
+
+<span class="kw">import           </span><span class="dt">Control.Lens</span>                     (assign)
+<span class="kw">import           </span><span class="dt">Data.Text</span>                        (<span class="dt">Text</span>(..))
+<span class="kw">import qualified</span> <span class="dt">Data.ByteString.Lazy.Char8</span> <span class="kw">as</span> <span class="dt">BS</span> (<span class="dt">ByteString</span>(..))
+
+<span class="ot">checkChallenge ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">YiM</span> ()
+checkChallenge challenge <span class="fu">=</span> <span class="kw">do</span>
+    vg <span class="ot">&lt;-</span> io <span class="fu">$</span> getVimgolfJSON challenge
+    withCurrentBuffer <span class="fu">$</span> <span class="kw">do</span> buf <span class="ot">&lt;-</span> readRegionB <span class="fu">=&lt;&lt;</span> regionOfB <span class="dt">Document</span>
+                           <span class="kw">if</span> ((R.toString buf) <span class="fu">==</span> ((getData <span class="fu">.</span> getOutput) vg))
+                           <span class="kw">then</span> replaceBufferContent <span class="st">&quot;SUCCESS&quot;</span>
+                           <span class="kw">else</span> replaceBufferContent <span class="st">&quot;FAILURE&quot;</span>
+
+<span class="ot">getChallenge ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">YiM</span> ()
+getChallenge challenge <span class="fu">=</span> <span class="kw">do</span>
+    vg <span class="ot">&lt;-</span> io <span class="fu">$</span> getVimgolfJSON challenge
+    strFun <span class="st">&quot;OUTPUT&quot;</span>
+    withCurrentBuffer <span class="fu">$</span> insertN (R.fromString ((getData <span class="fu">.</span> getOutput) vg))
+    withEditor splitE
+    bufRef <span class="ot">&lt;-</span> withEditor newTempBufferE
+    strFun <span class="st">&quot;INPUT&quot;</span>
+    withCurrentBuffer <span class="fu">$</span> insertN (R.fromString ((getData <span class="fu">.</span> getInput) vg))
+    <span class="kw">where</span> strFun <span class="fu">=</span> withCurrentBuffer <span class="fu">.</span> assign identA <span class="fu">.</span> <span class="dt">MemBuffer</span></code></pre></div>
+<p>Putting all of this together, you would get this final file:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE OverloadedStrings #-}</span>
+
+<span class="kw">module</span> <span class="dt">Vimgolf</span> <span class="kw">where</span>
+
+<span class="kw">import           </span><span class="dt">Yi</span>
+<span class="kw">import qualified</span> <span class="dt">Yi.Rope</span> <span class="kw">as</span> <span class="dt">R</span> (toString, fromString)
+<span class="kw">import           </span><span class="dt">Yi.Utils</span>     (io)
+
+<span class="kw">import           </span><span class="dt">Control.Applicative</span>              ((&lt;$&gt;), (&lt;*&gt;))
+<span class="kw">import           </span><span class="dt">Control.Lens</span>                     (assign)
+<span class="kw">import           </span><span class="dt">Data.Aeson</span>                       ((.:), <span class="dt">FromJSON</span>(..), eitherDecode, <span class="dt">Value</span>(..))
+<span class="kw">import           </span><span class="dt">Data.Text</span>                        (<span class="dt">Text</span>(..))
+<span class="kw">import qualified</span> <span class="dt">Data.ByteString.Lazy.Char8</span> <span class="kw">as</span> <span class="dt">BS</span> (<span class="dt">ByteString</span>(..))
+<span class="kw">import           </span><span class="dt">Network.HTTP.Conduit</span>             (simpleHttp)
+
+<span class="ot">getJSON ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">BS.ByteString</span>
+getJSON challenge <span class="fu">=</span> simpleHttp (<span class="st">&quot;http://vimgolf.com/challenges/&quot;</span> <span class="fu">++</span> challenge <span class="fu">++</span> <span class="st">&quot;.json&quot;</span>)
+
+<span class="kw">data</span> <span class="dt">VGTopLevel</span> <span class="fu">=</span> <span class="dt">VGTopLevel</span> {<span class="ot"> getInput  ::</span> <span class="dt">VGData</span>
+                             ,<span class="ot"> getOutput ::</span> <span class="dt">VGData</span>
+                             ,<span class="ot"> vimRC     ::</span> <span class="dt">String</span>
+                             ,<span class="ot"> client    ::</span> <span class="dt">String</span>
+                             } <span class="kw">deriving</span> (<span class="dt">Show</span>)
+
+<span class="kw">data</span> <span class="dt">VGData</span> <span class="fu">=</span> <span class="dt">VGData</span> {<span class="ot"> getData ::</span> <span class="dt">String</span>
+                     ,<span class="ot"> getType ::</span> <span class="dt">String</span>
+                     } <span class="kw">deriving</span> (<span class="dt">Show</span>)
+
+<span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">VGTopLevel</span> <span class="kw">where</span>
+    parseJSON (<span class="dt">Object</span> v) <span class="fu">=</span> <span class="dt">VGTopLevel</span> <span class="fu">&lt;$&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;in&quot;</span>
+                                      <span class="fu">&lt;*&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;out&quot;</span>
+                                      <span class="fu">&lt;*&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;vimrc&quot;</span>
+                                      <span class="fu">&lt;*&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;client&quot;</span>
+
+<span class="kw">instance</span> <span class="dt">FromJSON</span> <span class="dt">VGData</span> <span class="kw">where</span>
+    parseJSON (<span class="dt">Object</span> v) <span class="fu">=</span> <span class="dt">VGData</span> <span class="fu">&lt;$&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;data&quot;</span>
+                                  <span class="fu">&lt;*&gt;</span> v <span class="fu">.:</span> <span class="st">&quot;type&quot;</span>
+
+<span class="ot">getVimgolfJSON ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">IO</span> <span class="dt">VGTopLevel</span>
+getVimgolfJSON str <span class="fu">=</span> <span class="kw">do</span>
+    d <span class="ot">&lt;-</span> (eitherDecode <span class="fu">&lt;$&gt;</span> getJSON str)<span class="ot"> ::</span> <span class="dt">IO</span> (<span class="dt">Either</span> <span class="dt">String</span> <span class="dt">VGTopLevel</span>)
+    <span class="kw">case</span> d <span class="kw">of</span>
+        <span class="dt">Left</span> err <span class="ot">-&gt;</span> error <span class="st">&quot;FAIL&quot;</span>
+        <span class="dt">Right</span> vg <span class="ot">-&gt;</span> return vg
+
+<span class="ot">checkChallenge ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">YiM</span> ()
+checkChallenge challenge <span class="fu">=</span> <span class="kw">do</span>
+    vg <span class="ot">&lt;-</span> io <span class="fu">$</span> getVimgolfJSON challenge
+    withCurrentBuffer <span class="fu">$</span> <span class="kw">do</span> buf <span class="ot">&lt;-</span> readRegionB <span class="fu">=&lt;&lt;</span> regionOfB <span class="dt">Document</span>
+                           <span class="kw">if</span> ((R.toString buf) <span class="fu">==</span> ((getData <span class="fu">.</span> getOutput) vg))
+                           <span class="kw">then</span> replaceBufferContent <span class="st">&quot;SUCCESS&quot;</span>
+                           <span class="kw">else</span> replaceBufferContent <span class="st">&quot;FAILURE&quot;</span>
+
+<span class="ot">getChallenge ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">YiM</span> ()
+getChallenge challenge <span class="fu">=</span> <span class="kw">do</span>
+    vg <span class="ot">&lt;-</span> io <span class="fu">$</span> getVimgolfJSON challenge
+    renameBuffer <span class="st">&quot;OUTPUT&quot;</span>
+    withCurrentBuffer <span class="fu">$</span> insertN (R.fromString ((getData <span class="fu">.</span> getOutput) vg))
+    withEditor splitE
+    bufRef <span class="ot">&lt;-</span> withEditor newTempBufferE
+    renameBuffer <span class="st">&quot;INPUT&quot;</span>
+    withCurrentBuffer <span class="fu">$</span> insertN (R.fromString ((getData <span class="fu">.</span> getInput) vg))
+    <span class="kw">where</span> renameBuffer <span class="fu">=</span> withCurrentBuffer <span class="fu">.</span> assign identA <span class="fu">.</span> <span class="dt">MemBuffer</span></code></pre></div>
+<p>And finally, we need a way to call this from Yi. This can be done with a vim config as follows:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE OverloadedStrings #-}</span>
+<span class="ot">{-# OPTIONS_HADDOCK show-extensions #-}</span>
+
+<span class="kw">module</span> <span class="dt">Main</span> (main) <span class="kw">where</span>
+
+<span class="kw">import           </span><span class="dt">Yi</span> <span class="kw">hiding</span>
+<span class="kw">import qualified</span> <span class="dt">Yi.Keymap.Vim</span>        <span class="kw">as</span> <span class="dt">V2</span>
+<span class="kw">import qualified</span> <span class="dt">Yi.Keymap.Vim.Common</span> <span class="kw">as</span> <span class="dt">V2</span>
+<span class="kw">import qualified</span> <span class="dt">Yi.Keymap.Vim.Utils</span>  <span class="kw">as</span> <span class="dt">V2</span>
+
+<span class="kw">import           </span><span class="dt">Data.Monoid</span> (mappend)
+<span class="kw">import           </span><span class="dt">Vimgolf</span> (getChallenge, checkChallenge)
+
+main <span class="fu">=</span> yi <span class="fu">$</span> myConfig
+
+<span class="ot">myConfig ::</span> <span class="dt">Config</span>
+myConfig <span class="fu">=</span> defaultVimConfig { defaultKm <span class="fu">=</span> v2KeymapSet <span class="fu">$</span> myBindings }
+
+<span class="ot">myBindings ::</span> (<span class="dt">V2.EventString</span> <span class="ot">-&gt;</span> <span class="dt">EditorM</span> ()) <span class="ot">-&gt;</span> [<span class="dt">V2.VimBinding</span>]
+myBindings eval <span class="fu">=</span>
+       [ nmap' (leader <span class="st">&quot;s&quot;</span>) (getChallenge vgChallenge)
+       , nmap' (leader <span class="st">&quot;e&quot;</span>) (checkChallenge vgChallenge)
+       ]
+
+<span class="ot">vgChallenge ::</span> <span class="dt">String</span>
+vgChallenge <span class="fu">=</span> <span class="st">&quot;540629666a1e4000020d9e5a&quot;</span>
+
+<span class="ot">v2KeymapSet ::</span> ((<span class="dt">V2.EventString</span> <span class="ot">-&gt;</span> <span class="dt">EditorM</span> ()) <span class="ot">-&gt;</span> [<span class="dt">V2.VimBinding</span>]) <span class="ot">-&gt;</span> <span class="dt">KeymapSet</span>
+v2KeymapSet myBindings <span class="fu">=</span> V2.mkKeymapSet <span class="fu">$</span> V2.defVimConfig <span class="ot">`override`</span> \super this <span class="ot">-&gt;</span>
+    <span class="kw">let</span> eval <span class="fu">=</span> V2.pureEval this
+    <span class="kw">in</span> super {
+          V2.vimBindings <span class="fu">=</span> myBindings eval <span class="fu">++</span> V2.vimBindings super
+        }
+
+nmap'  x y <span class="fu">=</span> V2.mkStringBindingY <span class="dt">V2.Normal</span> (x, y, id)
+
+<span class="ot">leader ::</span> <span class="dt">V2.EventString</span> <span class="ot">-&gt;</span> <span class="dt">V2.EventString</span>
+leader <span class="fu">=</span> mappend <span class="st">&quot;\\&quot;</span></code></pre></div>
+<p>The challenge id is set in the config file. You can always edit the config file and use the yi function <code>reload</code> to restart as <code>:yi reload</code> in vim.</p>
+<p>Now, you can open up yi, and with an empty buffer, press <code>\s</code> to get the vimgolf challenge, edit the bottom buffer to match the top buffer, and press <code>\e</code> to check your result. We could easily extend this example to use the minibuffer, have a retry option, etc.</p>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $("#toc").tocify({context: "#page-content", selectors: "h1, h2, h3"});
+  });
+</script>
+
+    </div>
+    <div id="footer">
+  Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+  <p>Copyright (C) 2015, Yi developers</p>
+</div>
+
+  </body>
+</html>

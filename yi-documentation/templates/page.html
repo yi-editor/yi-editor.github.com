@@ -1,0 +1,15 @@
+<div class="row">
+  <div class="hidden-xs col-sm-4 col-md-4">
+    Contents:<br/>
+    <div id="toc"></div>
+  </div>
+  <div class="col-xs-12 col-sm-8 col-md-8" id="page-content">
+    $body$
+  </div>
+</div>
+
+<script>
+  $$(function() {
+    $$("#toc").tocify({context: "#page-content", selectors: "h1, h2, h3"});
+  });
+</script>

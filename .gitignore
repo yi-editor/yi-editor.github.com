@@ -1,3 +1,13 @@
+# Ignore hakyll
+site
+*.o
+*.hi
+cabal.sandbox.config
+.cabal-sandbox
+_cache
+_site
+dist
+
 # Ignore docs files
 _gh_pages
 _site
