@@ -2,7 +2,7 @@
 title: Installing/hacking Yi
 ---
 
-# Basics
+# Installing Yi
 
 Yi requires GHC 7.8 at minimum and is mainly developed with GHC 7.10.1.
 
@@ -50,6 +50,7 @@ make sure to install the supporting packages before installing Yi.
 Usually these packages are rarely updated and the version on Hackage
 is up-to-date. You can set up the supporting repositories from
 [the GitHub project page][ghproject].
+
 
 # Installing inside a Cabal sandbox
 
@@ -133,6 +134,55 @@ Still doesn't work? Try the older instructions such as those removed
 or
 [here](https://github.com/yi-editor/yi/commit/63cefe048e4f3f50d364150085b617424477e333).
 Make sure to let us know!
+
+# Installing Yi with Nix
+
+If you're interested in Hacking Yi with Nix, see the section on [Hacking Yi with Nix](#HackingYiwithnix). For simpler setups, you can use the Yi wrapper provided. You will need to edit your nix config file (usually `~/.nixpkgs/config.nix`) to reflect the following:
+
+~~~ haskell
+{ pkgs }:
+
+with pkgs;
+
+let
+  ghcCompiler = pkgs.haskell.packages.ghc7101;
+in
+{
+  packageOverrides = super: let self = super.pkgs; in
+  {
+    yi-custom = pkgs.yi.override {
+      haskellPackages = ghcCompiler;
+      extraPackages = p: with p; [ lens ];
+    };
+  };
+}
+~~~
+
+where `extraPackages` is a list of haskell packages you wish to use in your Yi config, and `haskellPackages` is your haskell package set.
+
+If you want to compile and install local version of certain haskell packages, within `packageOverrides` you could define a function as follows:
+
+~~~ haskell
+yi_packages = p: p.override {
+  overrides = se : su : {
+    yi = self.haskellPackages.callPackage /home/siddhu/Documents/code/yi {};
+    yi-language = self.haskellPackages.callPackage /home/siddhu/Documents/code/yi-language {};
+    };
+  };
+}
+~~~
+
+and replace `haskellPackages = ghcCompiler` with `haskellPackages = yi_packages ghcCompiler`.
+
+
+If the above doesn't work, or if you only need to test Yi once, you could manually set `$NIX_GHC` to point to your existing haskellpackages by running the following in the terminal:
+
+~~~ bash
+$ nix-shell -p yi
+$ export NIX_GHC=$(which ghc)
+$ yi
+~~~
+
 
 # Hacking Yi with nix
 
@@ -267,7 +317,7 @@ Actually installing Yi with nix along with user config is a bit out of
 scope of this section but it works similarly, wrapping the binary into
 a script which sets `GHC_PACKAGE_PATH`.
 
-# Automatic version tracking
+## Automatic version tracking
 
 Here's an extra bit: manually tracking changing versions of the
 subrepositories can get pretty boring, pretty quickly. You can however

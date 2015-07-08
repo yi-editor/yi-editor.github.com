@@ -6,7 +6,7 @@
 
   <title>Prototypes - Encoding Object Oriented inheritance in Haskell - Yi</title>
 
-  <link rel="stylesheet" type="text/css" href="../css/default.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/default.css" />
 
   <!-- jQuery & jQueryUI -->
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
@@ -14,7 +14,7 @@
   <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css" />
 
   <!-- Pandoc Style CSS -->
-  <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/syntax.css" />
 
   <!-- Bootstrap -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
@@ -23,7 +23,7 @@
 
   <!-- TOCify -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="../css/tocify.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/tocify.css" />
 
 </head>
 
@@ -37,16 +37,16 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../">Yi</a>
+      <a class="navbar-brand" href="../../">Yi</a>
     </div>
     <div class="navbar-collapse collapse navbar-right">
       <ul class="nav navbar-nav">
 	<!-- TODO: Take in a list and loop through it -->
-	<li><a href="../">Home</a></li>
-	<li><a href="../pages/about.html">About</a></li>
-	<li><a href="../pages/installing.html">Install</a></li>
-	<li><a href="../pages/contact.html">Contact</a></li>
-	<li><a href="../archive.html">Archive</a></li>
+	<li><a href="../../">Home</a></li>
+	<li><a href="../../pages/about/">About</a></li>
+	<li><a href="../../pages/installing/">Install</a></li>
+	<li><a href="../../pages/contact/">Contact</a></li>
+	<li><a href="../../archive/">Archive</a></li>
       </ul>
     </div>
   </div>
@@ -81,7 +81,7 @@ c <span class="fu">=</span> fc a b</code></pre></div>
 <p>In Yi, color themes have a similar structure: specific styles are defined in terms of base styles. If a user changes a base style, the change should be reflected automatically in all the styles that derive from it. As in the toy example above, we do not want the user to redefine everything from the ground up.</p>
 <p>So, what can we do, since Haskell lacks inheritance?</p>
 <h2 id="encoding-prototypes">Encoding prototypes</h2>
-<p>All is not lost! <a href="http://www.cis.upenn.edu/~bcpierce/tapl/index.html">Pierce (TAPL, paragraph 18.10)</a> has taught us that inheritance can be encoded as <em>open recursion</em>. The trick is to make the reference to the <code>self</code> object explicit. We can do so in Haskell by putting the definitions in a record and a lambda.</p>
+<p>All is not lost! <a href="http://www.cis.upenn.edu/~bcpierce/tapl/">Pierce (TAPL, paragraph 18.10)</a> has taught us that inheritance can be encoded as <em>open recursion</em>. The trick is to make the reference to the <code>self</code> object explicit. We can do so in Haskell by putting the definitions in a record and a lambda.</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Proto</span> <span class="fu">=</span> <span class="dt">Proto</span> {<span class="ot">a ::</span> <span class="dt">A</span>,<span class="ot"> b ::</span> <span class="dt">B</span>,<span class="ot"> c ::</span> <span class="dt">C</span>}
 proto <span class="fu">=</span> \self <span class="ot">-&gt;</span> <span class="dt">Proto</span> {
   a <span class="fu">=</span> fa (b self) (c self),

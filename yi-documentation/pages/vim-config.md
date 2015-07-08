@@ -1,7 +1,8 @@
 ---
-layout: page
 title: Vim configuration
 ---
+
+# Simple
 
 The simplest Vim configuration you can start with is as follows:
 
@@ -37,6 +38,8 @@ myConfig = defaultVimConfig
 ~~~
 
 We haven't really changed anything, but now we're being more explicit about the fields in the config file. We've only listed two fields, ```defaultKm``` which sets the keymap, and ```configUI``` which sets the UI. There are actually many more fields to defaultVimConfig, but right now we only care about these two fields.
+
+# Theme
 
 Let's make a small change. We want our UI to look more like Vim's, so we edit the configUI field:
 
@@ -166,7 +169,7 @@ And that's it. The nmap's and imap's look exactly like Vim's config! You don't n
 
 The above config (including the theme) is a simplified version of [Michal's config](https://github.com/yi-editor/yi/blob/master/yi-contrib/src/Yi/Config/Users/Michal.hs)
 
-### Extending Vim numbers
+# Extending Vim numbers
 
 Just to show you how easy it is to configure Yi, consider the following case.
 
@@ -224,6 +227,6 @@ leader = mappend "\\"
 
 That's how easy configuring Yi is. Simple function composition (of course, you should not mind looking at the source code first).
 
-### Removing Boilerplate
+# Removing Boilerplate
 
 See the section, Modularizing the config, for details on moving the boilerplate outside the yi.hs config file. In short, files that need to be imported can be placed in the ```.config/yi/lib``` directory.

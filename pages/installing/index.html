@@ -6,7 +6,7 @@
 
   <title>Installing/hacking Yi - Yi</title>
 
-  <link rel="stylesheet" type="text/css" href="../css/default.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/default.css" />
 
   <!-- jQuery & jQueryUI -->
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
@@ -14,7 +14,7 @@
   <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css" />
 
   <!-- Pandoc Style CSS -->
-  <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/syntax.css" />
 
   <!-- Bootstrap -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
@@ -23,7 +23,7 @@
 
   <!-- TOCify -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="../css/tocify.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/tocify.css" />
 
 </head>
 
@@ -37,16 +37,16 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../">Yi</a>
+      <a class="navbar-brand" href="../../">Yi</a>
     </div>
     <div class="navbar-collapse collapse navbar-right">
       <ul class="nav navbar-nav">
 	<!-- TODO: Take in a list and loop through it -->
-	<li><a href="../">Home</a></li>
-	<li><a href="../pages/about.html">About</a></li>
-	<li><a href="../pages/installing.html">Install</a></li>
-	<li><a href="../pages/contact.html">Contact</a></li>
-	<li><a href="../archive.html">Archive</a></li>
+	<li><a href="../../">Home</a></li>
+	<li><a href="../../pages/about/">About</a></li>
+	<li><a href="../../pages/installing/">Install</a></li>
+	<li><a href="../../pages/contact/">Contact</a></li>
+	<li><a href="../../archive/">Archive</a></li>
       </ul>
     </div>
   </div>
@@ -61,7 +61,7 @@
     <div id="toc"></div>
   </div>
   <div class="col-xs-12 col-sm-8 col-md-8" id="page-content">
-    <h1 id="basics">Basics</h1>
+    <h1 id="installing-yi">Installing Yi</h1>
 <p>Yi requires GHC 7.8 at minimum and is mainly developed with GHC 7.10.1.</p>
 <p>With the Haskell Platform installed, yi can be installed with cabal-install:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">cabal</span> update
@@ -104,6 +104,38 @@ $ <span class="kw">cabal</span> install</code></pre></div>
 </ul>
 <p>I suspect that it’d be perfectly possible to make your config file into a cabal project and manage the dependencies that way but I have not yet investigated this approach.</p>
 <p>Still doesn’t work? Try the older instructions such as those removed <a href="https://github.com/yi-editor/yi/commit/05b4d89b5e6a2ecd17a23a04659c7b5d828786d3">here</a> or <a href="https://github.com/yi-editor/yi/commit/63cefe048e4f3f50d364150085b617424477e333">here</a>. Make sure to let us know!</p>
+<h1 id="installing-yi-with-nix">Installing Yi with Nix</h1>
+<p>If you’re interested in Hacking Yi with Nix, see the section on <a href="#HackingYiwithnix">Hacking Yi with Nix</a>. For simpler setups, you can use the Yi wrapper provided. You will need to edit your nix config file (usually <code>~/.nixpkgs/config.nix</code>) to reflect the following:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">{ pkgs }<span class="fu">:</span>
+
+with pkgs;
+
+<span class="kw">let</span>
+  ghcCompiler <span class="fu">=</span> pkgs<span class="fu">.</span>haskell<span class="fu">.</span>packages<span class="fu">.</span>ghc7101;
+<span class="kw">in</span>
+{
+  packageOverrides <span class="fu">=</span> super<span class="fu">:</span> <span class="kw">let</span> self <span class="fu">=</span> super<span class="fu">.</span>pkgs; <span class="kw">in</span>
+  {
+    yi<span class="fu">-</span>custom <span class="fu">=</span> pkgs<span class="fu">.</span>yi<span class="fu">.</span>override {
+      haskellPackages <span class="fu">=</span> ghcCompiler;
+      extraPackages <span class="fu">=</span> p<span class="fu">:</span> with p; [ lens ];
+    };
+  };
+}</code></pre></div>
+<p>where <code>extraPackages</code> is a list of haskell packages you wish to use in your Yi config, and <code>haskellPackages</code> is your haskell package set.</p>
+<p>If you want to compile and install local version of certain haskell packages, within <code>packageOverrides</code> you could define a function as follows:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">yi_packages <span class="fu">=</span> p<span class="fu">:</span> p<span class="fu">.</span>override {
+  overrides <span class="fu">=</span> se <span class="fu">:</span> su <span class="fu">:</span> {
+    yi <span class="fu">=</span> self<span class="fu">.</span>haskellPackages<span class="fu">.</span>callPackage <span class="fu">/</span>home<span class="fu">/</span>siddhu<span class="fu">/</span><span class="dt">Documents</span><span class="fu">/</span>code<span class="fu">/</span>yi {};
+    yi<span class="fu">-</span>language <span class="fu">=</span> self<span class="fu">.</span>haskellPackages<span class="fu">.</span>callPackage <span class="fu">/</span>home<span class="fu">/</span>siddhu<span class="fu">/</span><span class="dt">Documents</span><span class="fu">/</span>code<span class="fu">/</span>yi<span class="fu">-</span>language {};
+    };
+  };
+}</code></pre></div>
+<p>and replace <code>haskellPackages = ghcCompiler</code> with <code>haskellPackages = yi_packages ghcCompiler</code>.</p>
+<p>If the above doesn’t work, or if you only need to test Yi once, you could manually set <code>$NIX_GHC</code> to point to your existing haskellpackages by running the following in the terminal:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">nix-shell</span> -p yi
+$ <span class="kw">export</span> <span class="ot">NIX_GHC=$(</span><span class="kw">which</span> ghc<span class="ot">)</span>
+$ <span class="kw">yi</span></code></pre></div>
 <h1 id="hacking-yi-with-nix">Hacking Yi with nix</h1>
 <p>Hacking Yi with nix is pretty easy. Forget about cabal sanboxes and other nastiness. You will first need a way to override the Haskell package set. I will not go into this here, see NixOS wiki and other associated resources for help.</p>
 <p>Once you have done this, you’ll need project files for each repository Yi depends on, as seen in its cabal file and from the repos <a href="https://github.com/yi-editor">here</a>.</p>
@@ -153,7 +185,7 @@ dynamicState      <span class="fu">=</span> normalPackageS se <span class="st">&
 <p>Here’s what happens: we set <code>GHC_PACKAGE_PATH</code> to the generated Yi package config inside dist (this allows us to find Yi modules) and the rest of packages (this allows to find all the dependencies). The reason for <code>$(pwd)/…</code> rather than a relative path is to keep this working after we <code>M-x cd</code> inside the editor. We set <code>TERM</code> which you might need depending on your terminal due to <code>nix-shell</code> messing with some env vars to ensure purity. We also set <code>yi_datadir</code> to the current directory so that Yi can finds its icon and such.</p>
 <p>Once all those are set, we run the compiled Yi itself (<code>dist/build/yi/yi</code>), point it somewhere <em>away</em> from the user config directory (<code>-y /tmp</code>), choose the frontend (<code>-fpango</code>), choose the keymap (<code>--as=emacs</code>) and choose the file to open (<code>/tmp/T.hs</code>). This should succesfully start up Yi and ensure <code>M-x</code> and all such dynamic commands work. All in all, this gives you an environment allowing you to hack Yi with <code>nix-shell</code> as always even though it’s spread across multiple repositories and has an unusual setup.</p>
 <p>Actually installing Yi with nix along with user config is a bit out of scope of this section but it works similarly, wrapping the binary into a script which sets <code>GHC_PACKAGE_PATH</code>.</p>
-<h1 id="automatic-version-tracking">Automatic version tracking</h1>
+<h2 id="automatic-version-tracking">Automatic version tracking</h2>
 <p>Here’s an extra bit: manually tracking changing versions of the subrepositories can get pretty boring, pretty quickly. You can however use nix to automatically read the version from the cabal file and create the derivation based on the result. It ends up a bit ugly but it works. For <code>yi-rope</code> my <code>default.nix</code> is therefore</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">{ cabal, binary, deepseq, fingertree, hspec, <span class="dt">QuickCheck</span>
 , quickcheckInstances, text, criterion

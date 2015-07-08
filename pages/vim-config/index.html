@@ -6,7 +6,7 @@
 
   <title>Vim configuration - Yi</title>
 
-  <link rel="stylesheet" type="text/css" href="../css/default.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/default.css" />
 
   <!-- jQuery & jQueryUI -->
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
@@ -14,7 +14,7 @@
   <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css" />
 
   <!-- Pandoc Style CSS -->
-  <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/syntax.css" />
 
   <!-- Bootstrap -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
@@ -23,7 +23,7 @@
 
   <!-- TOCify -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="../css/tocify.css" />
+  <link rel="stylesheet" type="text/css" href="../../css/tocify.css" />
 
 </head>
 
@@ -37,16 +37,16 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../">Yi</a>
+      <a class="navbar-brand" href="../../">Yi</a>
     </div>
     <div class="navbar-collapse collapse navbar-right">
       <ul class="nav navbar-nav">
 	<!-- TODO: Take in a list and loop through it -->
-	<li><a href="../">Home</a></li>
-	<li><a href="../pages/about.html">About</a></li>
-	<li><a href="../pages/installing.html">Install</a></li>
-	<li><a href="../pages/contact.html">Contact</a></li>
-	<li><a href="../archive.html">Archive</a></li>
+	<li><a href="../../">Home</a></li>
+	<li><a href="../../pages/about/">About</a></li>
+	<li><a href="../../pages/installing/">Install</a></li>
+	<li><a href="../../pages/contact/">Contact</a></li>
+	<li><a href="../../archive/">Archive</a></li>
       </ul>
     </div>
   </div>
@@ -61,7 +61,8 @@
     <div id="toc"></div>
   </div>
   <div class="col-xs-12 col-sm-8 col-md-8" id="page-content">
-    <p>The simplest Vim configuration you can start with is as follows:</p>
+    <h1 id="simple">Simple</h1>
+<p>The simplest Vim configuration you can start with is as follows:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Yi</span>
 
 main <span class="fu">=</span> yi <span class="fu">$</span> defaultVimConfig</code></pre></div>
@@ -82,6 +83,7 @@ myConfig <span class="fu">=</span> defaultVimConfig
     , configUI <span class="fu">=</span> configUI defaultVimConfig
     }</code></pre></div>
 <p>We haven’t really changed anything, but now we’re being more explicit about the fields in the config file. We’ve only listed two fields, <code>defaultKm</code> which sets the keymap, and <code>configUI</code> which sets the UI. There are actually many more fields to defaultVimConfig, but right now we only care about these two fields.</p>
+<h1 id="theme">Theme</h1>
 <p>Let’s make a small change. We want our UI to look more like Vim’s, so we edit the configUI field:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Yi</span>
 
@@ -192,7 +194,7 @@ leader <span class="fu">=</span> mappend <span class="st">&quot;\\&quot;</span>
 <span class="co">--Boilerplate ends here</span></code></pre></div>
 <p>And that’s it. The nmap’s and imap’s look exactly like Vim’s config! You don’t need to bother about how nmap and imap are defined. With a little bit of boilerplate, you can start configuring Yi just like Vim.</p>
 <p>The above config (including the theme) is a simplified version of <a href="https://github.com/yi-editor/yi/blob/master/yi-contrib/src/Yi/Config/Users/Michal.hs">Michal’s config</a></p>
-<h3 id="extending-vim-numbers">Extending Vim numbers</h3>
+<h1 id="extending-vim-numbers">Extending Vim numbers</h1>
 <p>Just to show you how easy it is to configure Yi, consider the following case.</p>
 <p>You want to modify the behavior of <code>&lt;C-a&gt;</code> in Vim by making the cursor stay at the same location, while still incrementing the number. You went ahead and looked at the source code for <code>&lt;C-a&gt;</code> which gave you <code>getCountE &gt;&gt;= withCurrentBuffer . incrementNextNumberByB</code>. Using this, you can simple use function composition, to add <code>savingPointB</code> which saves the cursor location and makes sure the cursor moves back to that location after the function is executed. In our case, the function <code>incrementNextNumberByB</code> is what gets executed, and that’s the function responsible for moving the cursor.</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE OverloadedStrings #-}</span>
@@ -242,7 +244,7 @@ nmap'  x y <span class="fu">=</span> V2.mkStringBindingY <span class="dt">V2.Nor
 leader <span class="fu">=</span> mappend <span class="st">&quot;\\&quot;</span>
 <span class="co">--Boilerplate ends here</span></code></pre></div>
 <p>That’s how easy configuring Yi is. Simple function composition (of course, you should not mind looking at the source code first).</p>
-<h3 id="removing-boilerplate">Removing Boilerplate</h3>
+<h1 id="removing-boilerplate">Removing Boilerplate</h1>
 <p>See the section, Modularizing the config, for details on moving the boilerplate outside the yi.hs config file. In short, files that need to be imported can be placed in the <code>.config/yi/lib</code> directory.</p>
   </div>
 </div>
