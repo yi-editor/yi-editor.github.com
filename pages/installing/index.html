@@ -72,6 +72,10 @@ $ <span class="kw">cabal</span> install yi</code></pre></div>
 <p>Options are <code>-fvty</code> and <code>-fpango</code>.</p>
 <p>Note: If you get a <code>frontend not found</code> warning, install yi with the frontend manually specified by -fvty or -fpango while doing cabal install.</p>
 <p>Note: If you’re having weird problems such as your changes not seeming to take effect, you might have some stale stuff in the cache directory which you should empty: on my system it’s <code>~/.cache/yi</code>.</p>
+<p>Note: if you use Stack, you can perform the equivalent of the above <code>cabal</code> commands with:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> install yi</code></pre></div>
+or
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> install yi --flag yi:vty --flag yi:pango</code></pre></div>
 <h1 id="installing-yi-from-source">Installing Yi from source</h1>
 <p>You can install Yi from source as follows:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">git</span> clone https://github.com/yi-editor/yi
