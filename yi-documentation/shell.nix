@@ -1,8 +1,7 @@
-{ nixpkgs ? import <nixpkgs> {}, compiler ? "ghc7101" }:
+{ nixpkgs ? import <nixpkgs> {} }:
 
 let
-  haskellPackageSet = nixpkgs.pkgs.haskell.packages.${compiler};
-  haskellEnv = haskellPackageSet.ghcWithPackages (p: with p; [
+  haskellEnv = nixpkgs.haskellPackages.ghcWithPackages (p: with p; [
     cabal2nix
     cabal-install
     hakyll

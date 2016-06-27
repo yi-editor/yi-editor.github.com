@@ -32,6 +32,19 @@ Note: If you're having weird problems such as your changes not seeming
 to take effect, you might have some stale stuff in the cache
 directory which you should empty: on my system it's `~/.cache/yi`.
 
+Note: If you use Stack, you can perform the equivalent of the above `cabal`
+commands with:
+
+~~~ bash
+$ stack install yi
+~~~
+
+or
+
+~~~ bash
+$ stack install yi --flag yi:vty --flag yi:pango
+~~~
+
 
 # Installing Yi from source
 
