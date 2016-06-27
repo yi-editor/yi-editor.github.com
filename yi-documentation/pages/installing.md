@@ -375,3 +375,33 @@ change versions often.
 
 [ghproject]: https://github.com/yi-editor
 
+# Installing Yi on MacOS
+
+If you're seeing an error like the following:
+
+~~~
+cabal: Error: some packages failed to install:
+text-icu-0.7.0.1 failed during the configure step. The exception was:
+ExitFailure 1
+~~~
+
+First make sure that the icu library is installed on the system:
+
+~~~ bash
+$ brew install icu4c
+~~~
+
+Yi might not be able to find the icu library on MacOS unless the lib and include paths are explicitly passed as arguments to cabal.
+
+~~~ bash
+$ cabal install text-icu --extra-lib-dirs=/usr/local/opt/icu4c/lib --extra-include-dirs=/usr/local/opt/icu4c/include
+$ cabal install yi --extra-lib-dirs=/usr/local/opt/icu4c/lib --extra-include-dirs=/usr/local/opt/icu4c/include
+~~~
+
+Or if you prefer stack instead:
+
+~~~ bash
+$ stack install text-icu --extra-lib-dirs=/usr/local/opt/icu4c/lib --extra-include-dirs=/usr/local/opt/icu4c/include
+$ stack install yi
+~~~
+

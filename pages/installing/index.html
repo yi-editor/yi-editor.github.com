@@ -72,9 +72,9 @@ $ <span class="kw">cabal</span> install yi</code></pre></div>
 <p>Options are <code>-fvty</code> and <code>-fpango</code>.</p>
 <p>Note: If you get a <code>frontend not found</code> warning, install yi with the frontend manually specified by -fvty or -fpango while doing cabal install.</p>
 <p>Note: If you’re having weird problems such as your changes not seeming to take effect, you might have some stale stuff in the cache directory which you should empty: on my system it’s <code>~/.cache/yi</code>.</p>
-<p>Note: if you use Stack, you can perform the equivalent of the above <code>cabal</code> commands with:</p>
+<p>Note: If you use Stack, you can perform the equivalent of the above <code>cabal</code> commands with:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> install yi</code></pre></div>
-or
+<p>or</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> install yi --flag yi:vty --flag yi:pango</code></pre></div>
 <h1 id="installing-yi-from-source">Installing Yi from source</h1>
 <p>You can install Yi from source as follows:</p>
@@ -166,7 +166,7 @@ $ <span class="kw">yi</span></code></pre></div>
 <span class="kw">drwxr-xr-x</span> 199 shana shana   4.0K Oct  5 18:36 ..
 <span class="kw">lrwxrwxrwx</span>   1 shana shana     64 Sep  6 06:59 default.nix -<span class="kw">&gt;</span> /home/shana/programming/nix-project-defaults/yi-rope/default.nix
 <span class="kw">lrwxrwxrwx</span>   1 shana shana     62 Sep  6 06:58 shell.nix -<span class="kw">&gt;</span> /home/shana/programming/nix-project-defaults/yi-rope/shell.nix
-<span class="kw">…</span></code></pre></div>
+…</code></pre></div>
 <p>Then stick it into your Haskell overrides. Currently my overrides for Yi repos look as follows:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">wordTrie          <span class="fu">=</span> normalPackageS se <span class="st">&quot;word-trie&quot;</span>;
 ooPrototypes      <span class="fu">=</span> normalPackageS se <span class="st">&quot;oo-prototypes&quot;</span>;
@@ -218,6 +218,19 @@ cabal<span class="fu">.</span>mkDerivation (self<span class="fu">:</span> {
   };
 })</code></pre></div>
 <p>The downside is if you ever run <code>cabal2nix</code> over it, this scheme will get clobbered so it’s mostly only useful for the repositories which will most likely not get many extra dependencies but are likely to change versions often.</p>
+<h1 id="installing-yi-on-macos">Installing Yi on MacOS</h1>
+<p>If you’re seeing an error like the following:</p>
+<pre><code>cabal: Error: some packages failed to install:
+text-icu-0.7.0.1 failed during the configure step. The exception was:
+ExitFailure 1</code></pre>
+<p>First make sure that the icu library is installed on the system:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">brew</span> install icu4c</code></pre></div>
+<p>Yi might not be able to find the icu library on MacOS unless the lib and include paths are explicitly passed as arguments to cabal.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">cabal</span> install text-icu --extra-lib-dirs=/usr/local/opt/icu4c/lib --extra-include-dirs=/usr/local/opt/icu4c/include
+$ <span class="kw">cabal</span> install yi --extra-lib-dirs=/usr/local/opt/icu4c/lib --extra-include-dirs=/usr/local/opt/icu4c/include</code></pre></div>
+<p>Or if you prefer stack instead:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> install text-icu --extra-lib-dirs=/usr/local/opt/icu4c/lib --extra-include-dirs=/usr/local/opt/icu4c/include
+$ <span class="kw">stack</span> install yi</code></pre></div>
   </div>
 </div>
 
