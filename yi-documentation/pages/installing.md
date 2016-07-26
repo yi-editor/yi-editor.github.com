@@ -45,6 +45,12 @@ or
 $ stack install yi --flag yi:vty --flag yi:pango
 ~~~
 
+then start Yi using:
+
+~~~bash
+$ stack exec yi --package yi
+~~~
+
 
 # Installing Yi from source
 
@@ -101,7 +107,7 @@ $ cabal install
 ~~~
 
 From cabal-install 1.20, Yi can be launched in an environment using the
-sandbox's package DB using `cabal exec ./dist/build/yi/yi`. It may be useful
+sandbox's package DB using `cabal exec yi`. It may be useful
 to create an alias or small script for this, along the lines of:
 
 ~~~ bash

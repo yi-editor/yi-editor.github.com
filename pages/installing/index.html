@@ -76,6 +76,8 @@ $ <span class="kw">cabal</span> install yi</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> install yi</code></pre></div>
 <p>or</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> install yi --flag yi:vty --flag yi:pango</code></pre></div>
+<p>then start Yi using:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> exec yi --package yi</code></pre></div>
 <h1 id="installing-yi-from-source">Installing Yi from source</h1>
 <p>You can install Yi from source as follows:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">git</span> clone https://github.com/yi-editor/yi
@@ -96,7 +98,7 @@ $ <span class="kw">cabal</span> --version</code></pre></div>
 $ <span class="kw">cabal</span> sandbox init
 $ <span class="kw">cabal</span> install --only-dependencies
 $ <span class="kw">cabal</span> install</code></pre></div>
-<p>From cabal-install 1.20, Yi can be launched in an environment using the sandbox’s package DB using <code>cabal exec ./dist/build/yi/yi</code>. It may be useful to create an alias or small script for this, along the lines of:</p>
+<p>From cabal-install 1.20, Yi can be launched in an environment using the sandbox’s package DB using <code>cabal exec yi</code>. It may be useful to create an alias or small script for this, along the lines of:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/usr/bin/env bash</span>
 <span class="ot">YI_DIR=$HOME</span>/programming/yi/yi
 <span class="kw">env</span> CABAL_SANDBOX_CONFIG=<span class="ot">$YI_DIR</span>/cabal.sandbox.config cabal exec <span class="ot">$YI_DIR</span>/dist/build/yi/yi -- <span class="st">&quot;</span><span class="ot">$@</span><span class="st">&quot;</span></code></pre></div>
