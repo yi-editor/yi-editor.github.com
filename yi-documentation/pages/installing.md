@@ -54,7 +54,21 @@ $ stack exec yi --package yi
 
 # Installing Yi from source
 
-You can install Yi from source as follows:
+The Yi source tree is split into multiple packages such as yi-core,
+yi-language. These are all described in
+[hpack](https://hackage.haskell.org/package/hpack) files, from which
+there will be derived appropriate Cabal files during building.
+
+Generally, Yi can be built using cabal or stack. For the stack users:
+Please note that stackage nightlies have recently been switched to GHC
+8. Since older versions of stack might fail to build Yi using GHC 8 or
+do not automatically generate Cabal files, consider upgrading to a recent
+version of stack in case you encounter build problems.
+
+## Using Cabal-install
+
+You can build and install Yi from source using Cabal-install as
+follows:
 
 ~~~ bash
 $ git clone https://github.com/yi-editor/yi
@@ -63,15 +77,24 @@ $ cabal update
 $ cabal install
 ~~~
 
-Yi is split into multiple smaller supporting packages (such as yi-rope
-and yi-language). If you are looking to get absolutely latest sources,
-make sure to install the supporting packages before installing Yi.
-Usually these packages are rarely updated and the version on Hackage
-is up-to-date. You can set up the supporting repositories from
-[the GitHub project page][ghproject].
+If you are looking to get absolutely latest sources, make sure to
+install the supporting packages before installing Yi.  Usually these
+packages are rarely updated and the version on Hackage is
+up-to-date. You can set up the supporting repositories from [the
+GitHub project page][ghproject].
 
+## Using Stack
 
-# Installing inside a Cabal sandbox
+Building and installing using stack should be similarly
+straightforward. After having cloned the repository and changed into
+its directory use the following commands:
+
+~~~ bash
+$ stack build
+$ stack install
+~~~
+
+## Using a Cabal sandbox
 
 Cabal-install 1.18 and higher support sandboxing which isolates
 the Yi installation from the rest of the cabal environment. This
