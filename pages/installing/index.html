@@ -79,13 +79,20 @@ $ <span class="kw">cabal</span> install yi</code></pre></div>
 <p>then start Yi using:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> exec yi --package yi</code></pre></div>
 <h1 id="installing-yi-from-source">Installing Yi from source</h1>
-<p>You can install Yi from source as follows:</p>
+<p>The Yi source tree is split into multiple packages such as yi-core, yi-language. These are all described in <a href="https://hackage.haskell.org/package/hpack">hpack</a> files, from which there will be derived appropriate Cabal files during building.</p>
+<p>Generally, Yi can be built using cabal or stack. For the stack users: Please note that stackage nightlies have recently been switched to GHC 8. Since older versions of stack might fail to build Yi using GHC 8 or do not automatically generate Cabal files, consider upgrading to a recent version of stack in case you encounter build problems.</p>
+<h2 id="using-cabal-install">Using Cabal-install</h2>
+<p>You can build and install Yi from source using Cabal-install as follows:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">git</span> clone https://github.com/yi-editor/yi
 $ <span class="kw">cd</span> yi
 $ <span class="kw">cabal</span> update
 $ <span class="kw">cabal</span> install</code></pre></div>
-<p>Yi is split into multiple smaller supporting packages (such as yi-rope and yi-language). If you are looking to get absolutely latest sources, make sure to install the supporting packages before installing Yi. Usually these packages are rarely updated and the version on Hackage is up-to-date. You can set up the supporting repositories from <a href="https://github.com/yi-editor">the GitHub project page</a>.</p>
-<h1 id="installing-inside-a-cabal-sandbox">Installing inside a Cabal sandbox</h1>
+<p>If you are looking to get absolutely latest sources, make sure to install the supporting packages before installing Yi. Usually these packages are rarely updated and the version on Hackage is up-to-date. You can set up the supporting repositories from <a href="https://github.com/yi-editor">the GitHub project page</a>.</p>
+<h2 id="using-stack">Using Stack</h2>
+<p>Building and installing using stack should be similarly straightforward. After having cloned the repository and changed into its directory use the following commands:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> build
+$ <span class="kw">stack</span> install</code></pre></div>
+<h2 id="using-a-cabal-sandbox">Using a Cabal sandbox</h2>
 <p>Cabal-install 1.18 and higher support sandboxing which isolates the Yi installation from the rest of the cabal environment. This is especially important if you plan on hacking on Yi itself, or on libraries for Yi.</p>
 <p>If your cabal version is lower than 1.20, you can install a newer version of cabal-install using cabal itself. This is recommended since newer versions of Cabal have several useful utilities for sandboxed environments.</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">cabal</span> update

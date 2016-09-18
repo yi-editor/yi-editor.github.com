@@ -24,6 +24,13 @@ $ cabal exec make
 
 If you prefer Nix instead, just drop into a nix-shell once you're inside `yi-documentation` and run make.
 
+You can get by with stack too:
+
+~~~ bash
+stack install hakyll
+stack exec make
+~~~
+
 # Deploying
 
 The output of the site is present it `yi-documentation/_site`. Copy the files in the output directory into the root of the github project.
