@@ -64,51 +64,51 @@
     <h1 id="installing-yi">Installing Yi</h1>
 <p>Yi requires GHC 7.8 at minimum and is mainly developed with GHC 7.10.1.</p>
 <p>With the Haskell Platform installed, yi can be installed with cabal-install:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">cabal</span> update
-$ <span class="kw">cabal</span> install yi</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="ex">cabal</span> update
+$ <span class="ex">cabal</span> install yi</code></pre></div>
 <p>On Linux systems, you will need ncurses development headers for the Vty frontend. For example, Ubuntu requires <code>libncurses5-dev</code> for ncurses support and <code>libicu-dev</code> for unicode support.</p>
 <p>The frontends for yi can be manually specified as follows:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">cabal</span> install yi -fvty -fpango</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="ex">cabal</span> install yi -fvty -fpango</code></pre></div>
 <p>Options are <code>-fvty</code> and <code>-fpango</code>.</p>
 <p>Note: If you get a <code>frontend not found</code> warning, install yi with the frontend manually specified by -fvty or -fpango while doing cabal install.</p>
 <p>Note: If you’re having weird problems such as your changes not seeming to take effect, you might have some stale stuff in the cache directory which you should empty: on my system it’s <code>~/.cache/yi</code>.</p>
 <p>Note: If you use Stack, you can perform the equivalent of the above <code>cabal</code> commands with:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> install yi</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="ex">stack</span> install yi</code></pre></div>
 <p>or</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> install yi --flag yi:vty --flag yi:pango</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="ex">stack</span> install yi --flag yi:vty --flag yi:pango</code></pre></div>
 <p>then start Yi using:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> exec yi --package yi</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="ex">stack</span> exec yi --package yi</code></pre></div>
 <h1 id="installing-yi-from-source">Installing Yi from source</h1>
 <p>The Yi source tree is split into multiple packages such as yi-core, yi-language. These are all described in <a href="https://hackage.haskell.org/package/hpack">hpack</a> files, from which there will be derived appropriate Cabal files during building.</p>
 <p>Generally, Yi can be built using cabal or stack. For the stack users: Please note that stackage nightlies have recently been switched to GHC 8. Since older versions of stack might fail to build Yi using GHC 8 or do not automatically generate Cabal files, consider upgrading to a recent version of stack in case you encounter build problems.</p>
 <h2 id="using-cabal-install">Using Cabal-install</h2>
 <p>You can build and install Yi from source using Cabal-install as follows:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">git</span> clone https://github.com/yi-editor/yi
-$ <span class="kw">cd</span> yi
-$ <span class="kw">cabal</span> update
-$ <span class="kw">cabal</span> install</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="fu">git</span> clone https://github.com/yi-editor/yi
+$ <span class="bu">cd</span> yi
+$ <span class="ex">cabal</span> update
+$ <span class="ex">cabal</span> install</code></pre></div>
 <p>If you are looking to get absolutely latest sources, make sure to install the supporting packages before installing Yi. Usually these packages are rarely updated and the version on Hackage is up-to-date. You can set up the supporting repositories from <a href="https://github.com/yi-editor">the GitHub project page</a>.</p>
 <h2 id="using-stack">Using Stack</h2>
 <p>Building and installing using stack should be similarly straightforward. After having cloned the repository and changed into its directory use the following commands:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> build
-$ <span class="kw">stack</span> install</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="ex">stack</span> build
+$ <span class="ex">stack</span> install</code></pre></div>
 <h2 id="using-a-cabal-sandbox">Using a Cabal sandbox</h2>
 <p>Cabal-install 1.18 and higher support sandboxing which isolates the Yi installation from the rest of the cabal environment. This is especially important if you plan on hacking on Yi itself, or on libraries for Yi.</p>
 <p>If your cabal version is lower than 1.20, you can install a newer version of cabal-install using cabal itself. This is recommended since newer versions of Cabal have several useful utilities for sandboxed environments.</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">cabal</span> update
-$ <span class="kw">cabal</span> install cabal-install
-$ <span class="kw">cabal</span> --version</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="ex">cabal</span> update
+$ <span class="ex">cabal</span> install cabal-install
+$ <span class="ex">cabal</span> --version</code></pre></div>
 <p>As Yi compiles your config file once you start it, the config needs to know where to look for any of its dependencies, such as Yi itself! If these are inside of the sandbox, it doesn’t know where to look and you’ll get config compilation errors due to missing modules.</p>
 <p>To sandbox, navigate to your source yi directory. For me it’s <code>~/programming/yi/</code>.</p>
 <p>We then setup a cabal sandbox:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">cd</span> ~/programming/yi
-$ <span class="kw">cabal</span> sandbox init
-$ <span class="kw">cabal</span> install --only-dependencies
-$ <span class="kw">cabal</span> install</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="bu">cd</span> ~/programming/yi
+$ <span class="ex">cabal</span> sandbox init
+$ <span class="ex">cabal</span> install --only-dependencies
+$ <span class="ex">cabal</span> install</code></pre></div>
 <p>From cabal-install 1.20, Yi can be launched in an environment using the sandbox’s package DB using <code>cabal exec yi</code>. It may be useful to create an alias or small script for this, along the lines of:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/usr/bin/env bash</span>
-<span class="ot">YI_DIR=$HOME</span>/programming/yi/yi
-<span class="kw">env</span> CABAL_SANDBOX_CONFIG=<span class="ot">$YI_DIR</span>/cabal.sandbox.config cabal exec <span class="ot">$YI_DIR</span>/dist/build/yi/yi -- <span class="st">&quot;</span><span class="ot">$@</span><span class="st">&quot;</span></code></pre></div>
+<span class="va">YI_DIR=$HOME</span>/programming/yi/yi
+<span class="fu">env</span> CABAL_SANDBOX_CONFIG=<span class="va">$YI_DIR</span>/cabal.sandbox.config cabal exec <span class="va">$YI_DIR</span>/dist/build/yi/yi -- <span class="st">&quot;</span><span class="va">$@</span><span class="st">&quot;</span></code></pre></div>
 <p>The <code>&quot;$@&quot;</code> part means that all the arguments we pass to this script are passed on to the Yi binary which means we can still use all the regular flags, such as <code>yi --as=emacs</code>. Of course, you’ll need to adjust the paths used to match your sandbox and package directories.</p>
 <p>There’s one more thing to mention in this section, and that is config dependencies. One of the great things about Yi is that we have access to the wealth of existing Haskell libraries and we can take advantage of this in our config file. There are two scenarios:</p>
 <ul>
@@ -146,9 +146,9 @@ with pkgs;
 }</code></pre></div>
 <p>and replace <code>haskellPackages = ghcCompiler</code> with <code>haskellPackages = yi_packages ghcCompiler</code>.</p>
 <p>If the above doesn’t work, or if you only need to test Yi once, you could manually set <code>$NIX_GHC</code> to point to your existing haskellpackages by running the following in the terminal:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">nix-shell</span> -p yi
-$ <span class="kw">export</span> <span class="ot">NIX_GHC=$(</span><span class="kw">which</span> ghc<span class="ot">)</span>
-$ <span class="kw">yi</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="ex">nix-shell</span> -p yi
+$ <span class="bu">export</span> <span class="va">NIX_GHC=$(</span><span class="fu">which</span> ghc<span class="va">)</span>
+$ <span class="ex">yi</span></code></pre></div>
 <h1 id="hacking-yi-with-nix">Hacking Yi with nix</h1>
 <p>Hacking Yi with nix is pretty easy. Forget about cabal sanboxes and other nastiness. You will first need a way to override the Haskell package set. I will not go into this here, see NixOS wiki and other associated resources for help.</p>
 <p>Once you have done this, you’ll need project files for each repository Yi depends on, as seen in its cabal file and from the repos <a href="https://github.com/yi-editor">here</a>.</p>
@@ -169,12 +169,12 @@ $ <span class="kw">yi</span></code></pre></div>
 })</code></pre></div>
 <p><code>myHaskellPackages</code> is my overriden package set. <code>noHaddock = true</code> so that hacking is not slow inside nix-shell. You can add extra tools you like to use to the <code>buildInputs</code> list.</p>
 <p>Symlink your <code>default.nix</code> and <code>shell.nix</code> from within your <code>yi-rope</code> checkout and ignore them in git (locally, not in .gitignore)</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">[<span class="kw">shana@lenalee</span>:~/programming/yi]$ l ~/programming/yi-rope
-<span class="kw">total</span> 168K
-<span class="kw">drwxr-xr-x</span>   6 shana shana   4.0K Sep 29 06:59 .
-<span class="kw">drwxr-xr-x</span> 199 shana shana   4.0K Oct  5 18:36 ..
-<span class="kw">lrwxrwxrwx</span>   1 shana shana     64 Sep  6 06:59 default.nix -<span class="kw">&gt;</span> /home/shana/programming/nix-project-defaults/yi-rope/default.nix
-<span class="kw">lrwxrwxrwx</span>   1 shana shana     62 Sep  6 06:58 shell.nix -<span class="kw">&gt;</span> /home/shana/programming/nix-project-defaults/yi-rope/shell.nix
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">[<span class="ex">shana@lenalee</span>:~/programming/yi]$ l ~/programming/yi-rope
+<span class="ex">total</span> 168K
+<span class="ex">drwxr-xr-x</span>   6 shana shana   4.0K Sep 29 06:59 .
+<span class="ex">drwxr-xr-x</span> 199 shana shana   4.0K Oct  5 18:36 ..
+<span class="ex">lrwxrwxrwx</span>   1 shana shana     64 Sep  6 06:59 default.nix -<span class="op">&gt;</span> /home/shana/programming/nix-project-defaults/yi-rope/default.nix
+<span class="ex">lrwxrwxrwx</span>   1 shana shana     62 Sep  6 06:58 shell.nix -<span class="op">&gt;</span> /home/shana/programming/nix-project-defaults/yi-rope/shell.nix
 …</code></pre></div>
 <p>Then stick it into your Haskell overrides. Currently my overrides for Yi repos look as follows:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">wordTrie          <span class="fu">=</span> normalPackageS se <span class="st">&quot;word-trie&quot;</span>;
@@ -194,7 +194,7 @@ dynamicState      <span class="fu">=</span> normalPackageS se <span class="st">&
 <p>You should now be able to simply use <code>ghci</code> on any file in the repository: <code>.ghci</code> is already set up to pick everything up.</p>
 <p>Once you’re done making changes, you probably want to run Yi and try them out. Run <code>eval &quot;$buildPhase&quot;</code> to build Yi. You can run the tests with <code>eval &quot;$checkPhase&quot;</code>.</p>
 <p>Now to run it, use something like</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">[<span class="kw">nix-shell</span>:~/programming/yi/yi]$ GHC_PACKAGE_PATH=<span class="st">&quot;</span><span class="ot">$(</span><span class="kw">pwd</span><span class="ot">)</span><span class="st">/dist/package.conf.inplace:</span><span class="ot">$GHC_PACKAGE_PATH</span><span class="st">&quot;</span> TERM=xterm yi_datadir=. dist/build/yi/yi -y /tmp -fpango --as=emacs /tmp/T.hs</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">[<span class="ex">nix-shell</span>:~/programming/yi/yi]$ GHC_PACKAGE_PATH=<span class="st">&quot;</span><span class="va">$(</span><span class="bu">pwd</span><span class="va">)</span><span class="st">/dist/package.conf.inplace:</span><span class="va">$GHC_PACKAGE_PATH</span><span class="st">&quot;</span> TERM=xterm yi_datadir=. dist/build/yi/yi -y /tmp -fpango --as=emacs /tmp/T.hs</code></pre></div>
 <p>Here’s what happens: we set <code>GHC_PACKAGE_PATH</code> to the generated Yi package config inside dist (this allows us to find Yi modules) and the rest of packages (this allows to find all the dependencies). The reason for <code>$(pwd)/…</code> rather than a relative path is to keep this working after we <code>M-x cd</code> inside the editor. We set <code>TERM</code> which you might need depending on your terminal due to <code>nix-shell</code> messing with some env vars to ensure purity. We also set <code>yi_datadir</code> to the current directory so that Yi can finds its icon and such.</p>
 <p>Once all those are set, we run the compiled Yi itself (<code>dist/build/yi/yi</code>), point it somewhere <em>away</em> from the user config directory (<code>-y /tmp</code>), choose the frontend (<code>-fpango</code>), choose the keymap (<code>--as=emacs</code>) and choose the file to open (<code>/tmp/T.hs</code>). This should succesfully start up Yi and ensure <code>M-x</code> and all such dynamic commands work. All in all, this gives you an environment allowing you to hack Yi with <code>nix-shell</code> as always even though it’s spread across multiple repositories and has an unusual setup.</p>
 <p>Actually installing Yi with nix along with user config is a bit out of scope of this section but it works similarly, wrapping the binary into a script which sets <code>GHC_PACKAGE_PATH</code>.</p>
@@ -233,13 +233,13 @@ cabal<span class="fu">.</span>mkDerivation (self<span class="fu">:</span> {
 text-icu-0.7.0.1 failed during the configure step. The exception was:
 ExitFailure 1</code></pre>
 <p>First make sure that the icu library is installed on the system:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">brew</span> install icu4c</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="ex">brew</span> install icu4c</code></pre></div>
 <p>Yi might not be able to find the icu library on MacOS unless the lib and include paths are explicitly passed as arguments to cabal.</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">cabal</span> install text-icu --extra-lib-dirs=/usr/local/opt/icu4c/lib --extra-include-dirs=/usr/local/opt/icu4c/include
-$ <span class="kw">cabal</span> install yi --extra-lib-dirs=/usr/local/opt/icu4c/lib --extra-include-dirs=/usr/local/opt/icu4c/include</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="ex">cabal</span> install text-icu --extra-lib-dirs=/usr/local/opt/icu4c/lib --extra-include-dirs=/usr/local/opt/icu4c/include
+$ <span class="ex">cabal</span> install yi --extra-lib-dirs=/usr/local/opt/icu4c/lib --extra-include-dirs=/usr/local/opt/icu4c/include</code></pre></div>
 <p>Or if you prefer stack instead:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">stack</span> install text-icu --extra-lib-dirs=/usr/local/opt/icu4c/lib --extra-include-dirs=/usr/local/opt/icu4c/include
-$ <span class="kw">stack</span> install yi</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="ex">stack</span> install text-icu --extra-lib-dirs=/usr/local/opt/icu4c/lib --extra-include-dirs=/usr/local/opt/icu4c/include
+$ <span class="ex">stack</span> install yi</code></pre></div>
   </div>
 </div>
 
