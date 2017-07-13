@@ -9,7 +9,7 @@ The site is built with [Hakyll](https://github.com/jaspervdj/hakyll). If you're 
 
 The source folder for the documentation is `yi-documentation`. Files in the top level directory are most likely Hakyll's output.
 
-If you're not a frequent Hakyll user, you can get into a Hakyll sandboxed environment either using cabal, or using Nix. Both the cabal and nix files needed for sandboxing are attached. Once you're in the development sandbox, you can build the site using `make`. The makefile will automatically build the site for you, and preview it on localhost:8000
+If you're not a frequent Hakyll user, you can get into a Hakyll environment either using stack, or using Nix. Both the necessary cabal and nix files are attached. The makefile will automatically build the site for you, and preview it on localhost:8000.
 
 The development workflow would look like the following:
 
@@ -17,19 +17,10 @@ The development workflow would look like the following:
 $ git clone https://github.com/yi-editor/yi-editor.github.com
 $ cd yi-editor.github.com
 $ cd yi-documentation
-$ cabal sandbox-init
-$ cabal install
-$ cabal exec make
+$ stack exec --package hakyll -- make
 ~~~
 
 If you prefer Nix instead, just drop into a nix-shell once you're inside `yi-documentation` and run make.
-
-You can get by with stack too:
-
-~~~ bash
-stack install hakyll
-stack exec make
-~~~
 
 # Deploying
 
