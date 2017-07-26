@@ -28,9 +28,18 @@ main = hakyll $ do
     route $ setExtension "html" `composeRoutes` niceRoute
     compile $ pandocCompiler
       >>= loadAndApplyTemplate "templates/post.html"    postCtx
+      >>= saveSnapshot "content"
       >>= loadAndApplyTemplate "templates/default.html" postCtx
       >>= relativizeUrls
       >>= removeIndexHtml
+      
+  create ["atom.xml"] $ do
+  route idRoute
+  compile $ do
+      let feedCtx = postCtx `mappend` bodyField "description"
+      posts <- fmap (take 10) . recentFirst =<<
+          loadAllSnapshots "posts/*" "content"
+      renderAtom feedConfiguration feedCtx posts
 
   match "index.html" $ do
     route idRoute
@@ -90,3 +99,12 @@ removeIndexHtml item = return $ fmap (withUrls removeIndexStr) item
                               | otherwise = x:removeIndexStr xs
     removeIndexStr [] = []
 -----------------------------------------------------------------
+
+feedConfiguration :: FeedConfiguration
+feedConfiguration = FeedConfiguration
+    { feedTitle       = "Yi blog"
+    , feedDescription = "Yi blog"
+    , feedAuthorName  = "Yi developers"
+    , feedAuthorEmail = "yi-devel@googlegroups.com"
+    , feedRoot        = "https://yi-editor.github.io/"
+    }

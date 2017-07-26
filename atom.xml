@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>Yi blog</title>
+    <link href="https://yi-editor.github.io//atom.xml" rel="self" />
+    <link href="https://yi-editor.github.io/" />
+    <id>https://yi-editor.github.io//atom.xml</id>
+    <author>
+        <name>Yi developers</name>
+        <email>yi-devel@googlegroups.com</email>
+    </author>
+    <updated>2017-07-25T00:00:00Z</updated>
+    <entry>
+    <title>Release 0.14</title>
+    <link href="https://yi-editor.github.io//posts/2017-07-25-release-0.14/index.html" />
+    <id>https://yi-editor.github.io//posts/2017-07-25-release-0.14/index.html</id>
+    <published>2017-07-25T00:00:00Z</published>
+    <updated>2017-07-25T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="info">
+    Posted on July 25, 2017
+    
+        by Dmitry Ivanov
+    
+</div>
+
+<p>The 0.14 section in the CHANGELOG has only one entry:</p>
+<pre><code> * yi-core now doesn&#39;t depend on dyre.
+   Dynamic configuration support is now provided by yi-dynamic-configuration package.</code></pre>
+<p>(This is also a good moment to plug a <a href="http://tonsky.me/blog/blind-spot-in-dependency/">post about why you should have a CHANGELOG file</a>)</p>
+<p>See the <a href="https://yi-editor.github.io/posts/2017-01-06-dyre/">previous post</a> on what dyre is and how it’s used in Yi.</p>
+<p>The benefits of this change are:</p>
+<ul>
+<li>Users of static configurations have a leaner editor.</li>
+<li>Improved separation of concerns helps current developers to stay sane while helping potential developers to comprehend the codebase piece by piece</li>
+</ul>
+<p>I intend to write another post about ongoing modularization of Yi and how it went from one package to a dozen in the last five years and what’s next in this direction.</p>
+<p>There are still areas where user experience is much worse than it should be (in both static and dynamic configurations):</p>
+<ul>
+<li>tweaking per-file indentation settings, like switching from spaces to tabs or different amount of spaces</li>
+<li>tweaking GUI settings like colorscheme or (for pango frontend) font size</li>
+<li>.. or in general when you’re just changing some config values like numbers, strings and colors</li>
+</ul>
+<p>If you feel any of it can be an interesting task, you’re very welcome to join! Here are some relevant tickets (but don’t let these limit you):</p>
+<ul>
+<li><a href="https://github.com/yi-editor/yi/issues/1006">#1006</a> Ex command for changing a colorscheme</li>
+<li><a href="https://github.com/yi-editor/yi/issues/1005">#1005</a> Ex commands for changing indentation settings</li>
+<li><a href="https://github.com/yi-editor/yi/issues/988">#988</a> Support vim modelines for per-file indentation settings</li>
+<li><a href="https://github.com/yi-editor/yi/issues/987">#987</a> Support EditorConfig files for per-project indentation settings</li>
+</ul>
+]]></summary>
+</entry>
+<entry>
+    <title>Dynamic and static compilation</title>
+    <link href="https://yi-editor.github.io//posts/2017-01-06-dyre/index.html" />
+    <id>https://yi-editor.github.io//posts/2017-01-06-dyre/index.html</id>
+    <published>2017-01-06T00:00:00Z</published>
+    <updated>2017-01-06T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="info">
+    Posted on January  6, 2017
+    
+        by Jaro Reinders
+    
+</div>
+
+<p>I will explain how the compilation of yi works and how the dynamic configurations tie into this.</p>
+<h2 id="dynamic-configurations">Dynamic configurations</h2>
+<p>Yi is basically a library which you can use to build your own editor. The configuration file is a perfectly valid haskell file which must be compiled like any other haskell file. In this file you can specify what you want your Yi to look like. You can even completely change the editor to the point that it would not be recognizable as Yi.</p>
+<p>For this to work you need to recompile your configuration file (and also dependencies like Yi itself) for every change you make. The dynamic configurations use <a href="https://github.com/willdonnelly/dyre">dyre</a> to try to automate this process.</p>
+<p>When a dynamic configuration starts it checks if <code>~/.config/yi/yi.hs</code> has been changed and recompiles it if it has been changed. It is also possible to manually trigger recompilation by running the reload command (<code>M-x-reload</code> in the emacs and <code>:reload</code> in the vim keymap), this will recompile <code>~/.config/yi/yi.hs</code> and then transfer the current state to the newly compiled Yi.</p>
+<p>To achieve dynamic recompilation you have to kickstart the process by compiling a dynamic configuration manually first. The default yi package is a static configuration so it won’t check for changes out of the box.</p>
+<h2 id="static-configurations">Static configurations</h2>
+<p>The static configurations are more obvious in that there is no automatic recompilation so you always know exactly what version of Yi you are using. Static configurations also allow for a complete cabal project to be your configuration. The advantages of a complete cabal project is that you can have dependencies other than just Yi.</p>
+<h2 id="why-switch">Why switch?</h2>
+<p>The dyre package that is used to provide this dynamic recompilation is derived from the way that xmonad handles recompilation. Xmonad is a window manager so it’s not restarted very often and it is inconvenient to restart so I think dynamic recompilation is very useful in that case. But Yi is a text editor and I personally restart my text editor very often so I think that Yi should not use a dynamic recompilations system unless it is very intuitive and stable.</p>
+<h2 id="the-future">The future</h2>
+<p>I think dynamic configurations are awesome and should be used in the future, but right now there are a few issues:</p>
+<ul>
+<li>You can’t use a complete cabal project as configuration.</li>
+<li>Errors in the compilation process are not handeled smoothly and can even leave Yi in a broken state.</li>
+<li>There’s no user friendly way to configure the dynamic recompilation (e.g. where the configuration file is located).</li>
+</ul>
+<p>It would also be nice to have a subset of the configuration in a DSL to allow for seamless configuration. It should be possible to change for example the font size without recompiling the entire editor. We could use <a href="https://github.com/Gabriel439/Haskell-Dhall-Library">dhall</a> for this.</p>
+]]></summary>
+</entry>
+<entry>
+    <title>Prototypes - Encoding Object Oriented inheritance in Haskell</title>
+    <link href="https://yi-editor.github.io//posts/2014-09-05-oop/index.html" />
+    <id>https://yi-editor.github.io//posts/2014-09-05-oop/index.html</id>
+    <published>2014-09-05T00:00:00Z</published>
+    <updated>2014-09-05T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="info">
+    Posted on September  5, 2014
+    
+        by Jeanphilippe Bernardy
+    
+</div>
+
+<p>In this post I will sketch an encoding for OO-style inheritance in Haskell, and show how this is used to in Yi to write code that can be customized.</p>
+<p>This can also serve as an introduction to the concepts defined in module Data.Prototype (currently found in Yi sources)</p>
+<h2 id="inheritance">Inheritance</h2>
+<p>Inheritance can create structures which are difficult to understand. Since a given method call can call dispatch to a number of methods at run-time, tracking what is going on might be tricky. Sometimes however, inheritance is exactly the construct we need.</p>
+<p>Imagine you have the following piece of code:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">a ::</span> <span class="dt">A</span>
+a <span class="fu">=</span> fa b c
+
+<span class="ot">b ::</span> <span class="dt">B</span>
+b <span class="fu">=</span> fb a c
+
+<span class="ot">c ::</span> <span class="dt">C</span>
+c <span class="fu">=</span> fc a b</code></pre></div>
+<p>That is, <code>a</code>, <code>b</code> and <code>c</code> are values defined in terms of each other.</p>
+<p>You would like users to be able to customize <code>a</code>’s value. However, if the change actually occurs in the definition of <code>c</code>, you don’t want them to copy-paste the whole set of definitions. It would be preferable to amend only the definition for <code>c</code> and reuse the rest. Unfortunately, <code>a</code>’s value is <em>closed</em>, so this is not possible.</p>
+<p>This situation seems to cry for inheritance. In an object oriented language, the solution is obvious: make <code>a</code>, <code>b</code> and <code>c</code> methods of a class. The user can then inherit it and override the definition of <code>c</code>.</p>
+<p>In Yi, color themes have a similar structure: specific styles are defined in terms of base styles. If a user changes a base style, the change should be reflected automatically in all the styles that derive from it. As in the toy example above, we do not want the user to redefine everything from the ground up.</p>
+<p>So, what can we do, since Haskell lacks inheritance?</p>
+<h2 id="encoding-prototypes">Encoding prototypes</h2>
+<p>All is not lost! <a href="http://www.cis.upenn.edu/~bcpierce/tapl/index.html">Pierce (TAPL, paragraph 18.10)</a> has taught us that inheritance can be encoded as <em>open recursion</em>. The trick is to make the reference to the <code>self</code> object explicit. We can do so in Haskell by putting the definitions in a record and a lambda.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">Proto</span> <span class="fu">=</span> <span class="dt">Proto</span> {<span class="ot">a ::</span> <span class="dt">A</span>,<span class="ot"> b ::</span> <span class="dt">B</span>,<span class="ot"> c ::</span> <span class="dt">C</span>}
+proto <span class="fu">=</span> \self <span class="ot">-&gt;</span> <span class="dt">Proto</span> {
+  a <span class="fu">=</span> fa (b self) (c self),
+  b <span class="fu">=</span> fb (a self) (c self),
+  c <span class="fu">=</span> fc (a self) (b self)
+ }</code></pre></div>
+<p>We can retrieve our original definitions by taking the fix-point:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">abc <span class="fu">=</span> fix proto</code></pre></div>
+<p>Of course, this works only because Haskell is lazy (and because the original definition did not introduce an infinite recursion in the first place). If the fields of the record are marked strict, this ceases to work.</p>
+<p>Given that definition, it is easy to customize the value as follows:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">customizedProto <span class="fu">=</span> \self <span class="ot">-&gt;</span> proto self {
+   c <span class="fu">=</span> userFunction (a self) (b self)
+ }
+
+customizedABC <span class="fu">=</span> fix customizedProto</code></pre></div>
+<p>The <code>Data.Prototype</code> module generalizes this example, and defines types and functions to corresponding to the prototype and inheritance abstractions.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Yi is intended to be highly customizable. In many instances, we can use compositional abstractions to provide customization. In some other instances, we prefer to provide a prototype that user can patch.</p>
+<p>Despite Haskell lacking inheritance, we see that the basic concepts of lambda expression and lazy evaluation can be combined to provide a very lightweight encoding for prototypes, and we take advantage of this in Yi.</p>
+]]></summary>
+</entry>
+<entry>
+    <title>Incremental parsing</title>
+    <link href="https://yi-editor.github.io//posts/2014-09-04-incremental-parsing/index.html" />
+    <id>https://yi-editor.github.io//posts/2014-09-04-incremental-parsing/index.html</id>
+    <published>2014-09-04T00:00:00Z</published>
+    <updated>2014-09-04T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="info">
+    Posted on September  4, 2014
+    
+        by Jeanphilippe Bernardy
+    
+</div>
+
+<p>In this post I will motivate Yi’s incremental parsing library and describe the main ideas behind it.</p>
+<h2 id="why-another-parsing-library">Why another parsing library?</h2>
+<p>Why bothering developing another parsing framework while there exist plenty already?</p>
+<p>First, since we want to parse many languages, in many flavors, we want to be able to reuse pieces of grammars. Since we are using Haskell, the easiest way to achieve this is to through a parser-combinator library.</p>
+<p>Second, we want to give timely feedback to users. Therefore, the parser has to be efficient. In particular, responsivity should not depend on the length of file. On the other hand, the input file will change incrementally (as the user edits it), and the parser should take advantage of this. It should reuse previous results to speed up the parse.</p>
+<p>Third, the parser must gracefully handle errors in the input: while files are being edited, they will inevitably contain syntactically incorrect programs at several moments.</p>
+<p>No parsing framework combining these characteristics exists.</p>
+<h2 id="approach">Approach</h2>
+<p>Hughes and Swierstra have shown how <a href="http://www.cs.uu.nl/groups/ST/Software/UU_Parsing/p224-swierstra.pdf">online parsers</a> can be constructed. An <em>online</em> parser takes advantage of lazy evaluation: the input is analyzed only as far as needed to produce the part of the result that is forced.</p>
+<p>Effectively, this solves part of the incremental parsing problem: since the user can see only one page of text at a time, the editor will only force so much of the result tree, and only the corresponding part of the input will be analyzed, making the parser response time independent of the length of the input.</p>
+<p>This does not completely solve the problem though. If the user edits the end of the file, the whole input will have to be analyzed at each key-press.</p>
+<h2 id="caching-results">Caching results</h2>
+<p>The proposed solution is to cache intermediate parsing results. For given positions in the input (say every half-page), we will store a partially evaluated state of the parsing automaton. Whenever the input is modified, the new parsing result will be computed by using the most relevant cached state, and applying the new input to it. The cached states that became invalidated will also be recomputed on the basis of the most relevant state.</p>
+<p>Of course, the cached states will only be computed lazily, so that no cost is paid for cached states that will be discarded.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>The strategy sketched above has several advantages:</p>
+<ul>
+<li><p>The design is relatively straightforward, and adds only a hundred lines of code compared to the polish parsers of Hughes and Swierstra.</p></li>
+<li><p>There is no start-up cost. A non-online approach would need to parse the whole file the first time it is loaded. In our approach loading is instantaneous, and parsing proceeds as the user scrolls down the file.</p></li>
+<li><p>The caching strategy is independent of the underlying parsing automaton. We only require it to accept partial inputs.</p></li>
+</ul>
+<p>Its notable that the design has a strong functional flavor:</p>
+<ul>
+<li><p>We never update a parse tree (no references, no zipper) and still achieve incremental parsing.</p></li>
+<li><p>We take advantage of lazy evaluation in a cool way.</p></li>
+</ul>
+<p>The main drawback is that the user code must use the parse tree lazily, and there is no way to enforce this in any current implementation of Haskell.</p>
+]]></summary>
+</entry>
+<entry>
+    <title>Demo</title>
+    <link href="https://yi-editor.github.io//posts/2014-09-03-demo/index.html" />
+    <id>https://yi-editor.github.io//posts/2014-09-03-demo/index.html</id>
+    <published>2014-09-03T00:00:00Z</published>
+    <updated>2014-09-03T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="info">
+    Posted on September  3, 2014
+    
+        by Jeanphilippe Bernardy
+    
+</div>
+
+<p>I gave a Yi demo at the Haskell Symposium, and the <a href="http://video.google.com/videoplay?docid=4183423992181607417">video</a> (recorded “guerrilla style”) is available! (It should also appear on the ACM Digital Library too, hopefully in better quality, but don’t hold your breath.)</p>
+<p>The first part demonstrates the Haskell support capabilities, while the second one shows how Yi can be configured and extended.</p>
+<p>The demo abstract can be found <a href="http://www.cse.chalmers.se/~bernardy/2008-haskell039-bernardy.pdf">here</a>.</p>
+]]></summary>
+</entry>
+<entry>
+    <title>Configuration</title>
+    <link href="https://yi-editor.github.io//posts/2014-09-02-configuration/index.html" />
+    <id>https://yi-editor.github.io//posts/2014-09-02-configuration/index.html</id>
+    <published>2014-09-02T00:00:00Z</published>
+    <updated>2014-09-02T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="info">
+    Posted on September  2, 2014
+    
+        by Jeanphilippe Bernardy
+    
+</div>
+
+<p>In this post I’ll give a walkthrough to a simple Yi configuration.</p>
+<p>First, note that Yi has no special purpose configuration language. Yi provides building blocks, that the user can combine to create their own editor. This means that the configuration file is a top-level Haskell script , defining a <em>main</em> function.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">import </span><span class="dt">Yi</span>
+<span class="kw">import </span><span class="dt">Yi.Keymap.Emacs</span> <span class="kw">as</span> <span class="dt">Emacs</span>
+<span class="kw">import </span><span class="dt">Yi.String</span> (mapLines)
+
+<span class="ot">main ::</span> <span class="dt">IO</span> ()
+main <span class="fu">=</span> yi <span class="fu">$</span> defaultConfig {
+  defaultKm <span class="fu">=</span>
+      (meta (char <span class="ch">&#39;r&#39;</span>) <span class="fu">?&gt;&gt;!</span> increaseIndent)
+     <span class="co">-- and use the default Emacs keymap otherwise</span>
+     <span class="fu">&lt;||</span> Emacs.keymap
+ }
+
+
+<span class="co">-- | Increase the indentation of the selection</span>
+<span class="ot">increaseIndent ::</span> <span class="dt">BufferM</span> ()
+increaseIndent <span class="fu">=</span> <span class="kw">do</span>
+  r <span class="ot">&lt;-</span> getSelectRegionB
+  r&#39; <span class="ot">&lt;-</span> unitWiseRegion <span class="dt">Line</span> r
+     <span class="co">-- extend the region to full lines</span>
+  modifyRegionB (mapLines (<span class="ch">&#39; &#39;</span><span class="fu">:</span>)) r&#39;
+     <span class="co">-- prepend each line with a space</span></code></pre></div>
+<p>In the above example, the user has defined a new <em>BufferM</em> action, <em>increaseIndent</em>, using the library of functions available in Yi. Then, he has created a new key-binding for it. Using the disjunction operator (&lt;|&gt;), this binding has been merged with the emacs emulation keymap.</p>
+<p>This is a very simple example, but it shows how powerful the approach is: there is no limit to what functions the user can create. It is also trivial to use any Haskell package and make its function available in the editor. This is an obvious advantage over the traditional approach, where only a special purpose language is available in the configuration file.</p>
+<p>Another advantage to this configuration style is is purely declarative flavour. The user defines the behaviour of the editor “from the ground up”. This can be contrasted to emacs (and lisp) style, where the configuration is a series of modifications of the <em>state</em>.</p>
+<p>Finally, I shall say that this configuration model is not unique to Yi: it has already been used with success in the XMonad window manager.</p>
+]]></summary>
+</entry>
+<entry>
+    <title>Overall Structure</title>
+    <link href="https://yi-editor.github.io//posts/2014-09-01-structure/index.html" />
+    <id>https://yi-editor.github.io//posts/2014-09-01-structure/index.html</id>
+    <published>2014-09-01T00:00:00Z</published>
+    <updated>2014-09-01T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="info">
+    Posted on September  1, 2014
+    
+        by Jeanphilippe Bernardy
+    
+</div>
+
+<p>In this post I’ll give a very high-level overview of Yi’s structure.</p>
+<p>This the first part of a series that should eventually constitute a guide for Yi hacking… but let’s get going!</p>
+<p>Yi code can be categorized into four parts:</p>
+<ul>
+<li><p>Actions, which are operations having some effect on the editor state. This can be opening or saving a file, or moving the cursor in the current buffer.</p></li>
+<li><p>Keymaps, governing how user input maps to actions. Yi comes with keymaps for emacs and vi emulation, (and users are encouraged to write their own keymaps). Keymaps are very much like parsers, but they produce a stream of actions instead of a parse-tree.</p></li>
+<li><p>UIs, which are responsible for rendering the editor state, and getting the stream of input events from the user. Yi comes with console, gtk and cocoa UI.</p></li>
+<li><p>Glue code, to tie the knot between Keymaps and UI.</p></li>
+</ul>
+<p>The structure described above is very flexible: there is very low coupling between components. Indeed, one can easily swap out one component for another in the same category. For example, the user can choose between the different UIs and key-bindings at runtime.</p>
+<p>The “actions” part makes up most of the editor code. This part is structured around a stack of three monadic DSLs.</p>
+<ul>
+<li><p>BufferM: A monad for all buffer-local operations, like insertion and deletion of text, and annotation of buffer contents. It can be understood as a monad that encapsulates the state of one buffer.</p></li>
+<li><p>EditorM: A monad for editor-level operations, e.g., opening and closing windows and buffers. Operations involving more than one buffer are handled at this level too.</p></li>
+<li><p>YiM: A monad for IO-level operations. There, one can operate on files, processes, etc. This is the only level where IO can be performed.</p></li>
+</ul>
+<p>All these parts are easily composable, and this makes convenient to extend (and configure) the editor. In the next post we’ll see in more detail how to do so.</p>
+]]></summary>
+</entry>
+
+</feed>
