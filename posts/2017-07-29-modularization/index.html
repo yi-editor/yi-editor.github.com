@@ -1,0 +1,133 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Modularization - Yi</title>
+
+  <link rel="stylesheet" type="text/css" href="../../css/default.css" />
+
+  <!-- jQuery & jQueryUI -->
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css" />
+
+  <!-- Pandoc Style CSS -->
+  <link rel="stylesheet" type="text/css" href="../../css/syntax.css" />
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+  <!-- TOCify -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="../../css/tocify.css" />
+
+</head>
+
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="../../">Yi</a>
+    </div>
+    <div class="navbar-collapse collapse navbar-right">
+      <ul class="nav navbar-nav">
+	<!-- TODO: Take in a list and loop through it -->
+	<li><a href="../../">Home</a></li>
+	<li><a href="../../pages/about/">About</a></li>
+	<li><a href="../../pages/installing/">Install</a></li>
+	<li><a href="../../pages/contact/">Contact</a></li>
+	<li><a href="../../archive/">Archive</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+    <div id="content" class="container">
+        <h1>Modularization</h1>
+
+        <div class="info">
+    Posted on July 29, 2017
+    
+        by Dmitry Ivanov
+    
+</div>
+
+<p>Following <a href="https://yi-editor.github.io/posts/2017-07-25-release-0.14/">previous post</a> it is a good moment to talk about ongoing modularization of Yi.</p>
+<p>Rewind to a moment I started contributing to Yi: 2012. After two years of using vim I found a bug in it. It wasn’t anything too serious like a crash or corruption of user text, just some undocumented inconsistency in behavior. I thought, well, it’s open source why not try to fix it? This was the first time I looked at vim’s source code and was completely overwhelmed. Hundreds of thousands of lines of C. It’s not unprecedented, of course, but it’s A LOT. At that point I’ve only seen a codebase comparable in size one time at work, but that was, while larger, much more modular.</p>
+<p>After some hours of trying to find a relevant place in vim, I was sufficiently lost to arrive at a question “Is there a vim-like editor that is written simpler?”. I remember looking at <a href="https://kate-editor.org/">Kate</a>, <a href="https://github.com/chrizel/Yzis">Yzis</a> and Yi. Was I going through a list of vi emulations in reverse lexicographical order? Probably. Was I using KDE at the time? Definitely. Anyway, Yi seemed interesting because it had about 20 thousands lines of code and had multiple frontends (Terminal, Gtk and Cocoa) and multiple keymaps (vim and emacs, naturally).</p>
+<p>This is how Yi was split into packages, or rather into a library part and an executable part within one cabal project at the time:</p>
+<pre><code>&gt; cloc yi/src/library
+     158 text files.
+     158 unique files.
+      29 files ignored.
+
+github.com/AlDanial/cloc v 1.72  T=0.49 s (262.7 files/s, 57554.5 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Haskell                        129           4514           4647          19103
+-------------------------------------------------------------------------------
+
+&gt; cloc yi/src/executable
+       1 text file.
+       1 unique file.
+       0 files ignored.
+
+github.com/AlDanial/cloc v 1.72  T=0.01 s (95.5 files/s, 1241.3 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Haskell                          1              5              3              5
+-------------------------------------------------------------------------------</code></pre>
+<p>So basically one package. Interestingly, Yi had a custom prelude and that gathered lots of complaints over the following years until Mateusz finally removed it in 2014. And yet these days custom preludes seem <a href="https://hackage.haskell.org/package/rebase">to</a> <a href="https://hackage.haskell.org/package/basic-prelude">be</a> <a href="https://hackage.haskell.org/package/classy-prelude">all</a> <a href="https://hackage.haskell.org/package/foundation">the</a> <a href="https://hackage.haskell.org/package/protolude">rage</a>? By contrast, top result in google for “custom prelude” from 2012 is <a href="https://stackoverflow.com/questions/13649415/custom-prelude-module-bad-idea">this answer by Don Stewart</a> saying not to do it.</p>
+<p>Of course, I was not the first person to come up with the idea to split emacs emulation from vim one and terminal interface from GUI. In fact, here is the quote from 2012 README:</p>
+<pre><code>We also want to simplify the core Yi package to make it more accessible, splitting some parts into several packages.</code></pre>
+<p>Back then it was significantly harder to do just because of the tooling. Not only there was no <a href="https://docs.haskellstack.org/en/stable/README/">stack</a> at the time, cabal sandboxes were not a thing <a href="http://coldwa.st/e/blog/2013-08-20-Cabal-sandbox.html">until late 2013</a>. I fondly remember the character-building days of nuking your global ghc and cabal directories.</p>
+<p>But thanks to cabal and later also stack folks things were steadily improving since.</p>
+<p>The tooling situation was not the only difficulty, Yi had several circular references between modules. One by one, we untangled these and split some libraries potentially useful outside of yi.</p>
+<p><a href="http://packdeps.haskellers.com/reverse/yi-rope">yi-rope</a> is actually used by <a href="https://github.com/ChrisPenner/rasa">our friendly competitor rasa</a> and <a href="https://github.com/alanz/haskell-lsp">haskell-lsp</a>.</p>
+<p><a href="https://hackage.haskell.org/package/oo-prototypes-0.1.0.0/docs/Data-Prototype.html">oo-prototypes</a> still blows my mind five years later. Yi was my intro to Haskell after a HelloWorld and I was basically greeted by a module saying “here we implement OOP inheritance in 7 lines out of thin air”.</p>
+<p><a href="https://github.com/yi-editor/yi/tree/master/yi-language">yi-language</a> I’m not too happy about, because we split it not because it’s a self-contained thing, but just to isolate <a href="https://www.haskell.org/alex/">alex</a>-related stuff that was killing incremental compilation. I’m hoping to reshuffle this part, so that pieces of yi-language like Yi.Buffer.Basic and Yi.Region end up in yi-core and everything alex-related lives in yi-alex-utils-or-something and becomes entirely optional, that is you will be able assemble an editor without a dependency on alex.</p>
+<p>Some time later stack came about and made it easy to work with multiproject repos and we finally split all the frontends and keymaps into separate projects.</p>
+<p>So this is how project structure looks now:</p>
+<pre><code>Project                     Lines of haskell code
+yi-core                     10335
+yi-dynamic-configuration    81
+yi-frontend-pango           1566
+yi-frontend-vty             407
+yi-fuzzy-open               214
+yi-intero                   140
+yi-ireader                  124
+yi-keymap-cua               147
+yi-keymap-emacs             643
+yi-keymap-vim               4669
+yi-language                 803
+yi-misc-modes               449
+yi-mode-haskell             1246
+yi-mode-javascript          601
+yi-snippet                  375</code></pre>
+<p>So in my mind the next thing in modularization of Yi is moving alex-powered highlighting into a plugin while making yi-core expose some general interface. It is already possible to make syntax highlighting without alex, e.g. I have <a href="https://github.com/ethercrow/yi-config/blob/master/modules/RainbowMode.hs">rainbow parens mode</a> in my config where actual parsing is done by <a href="https://hackage.haskell.org/package/regex-applicative">regex-applicative</a>, but it doesn’t feel like a first class citizen.</p>
+<p>Finally, if this story was interesting to you, you’re very welcome to join the development!</p>
+<p>Do you care about how pretty does editor look? Make a new shiny frontend!</p>
+<p>Have an idea about a new crazy ergonomic control scheme? Try it out as a new keymap for Yi.</p>
+<p>Maybe you’re interested in optimizing haskell code? Yi has plenty of that.</p>
+<p>In any case, don’t hesitate to file an issue, make a PR or chat.</p>
+
+    </div>
+    <div id="footer">
+  Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+  <p>Copyright (C) 2015-2017, Yi developers</p>
+</div>
+
+  </body>
+</html>
