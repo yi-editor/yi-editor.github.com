@@ -227,7 +227,8 @@ cabal<span class="fu">.</span>mkDerivation (self<span class="fu">:</span> {
   };
 })</code></pre></div>
 <p>The downside is if you ever run <code>cabal2nix</code> over it, this scheme will get clobbered so it’s mostly only useful for the repositories which will most likely not get many extra dependencies but are likely to change versions often.</p>
-<h1 id="installing-yi-on-macos">Installing Yi on MacOS</h1>
+<h1 id="installing-yi-on-macos">Installing Yi on macOS</h1>
+<h2 id="icu-dependency">ICU dependency</h2>
 <p>If you’re seeing an error like the following:</p>
 <pre><code>cabal: Error: some packages failed to install:
 text-icu-0.7.0.1 failed during the configure step. The exception was:
@@ -240,6 +241,16 @@ $ <span class="ex">cabal</span> install yi --extra-lib-dirs=/usr/local/opt/icu4c
 <p>Or if you prefer stack instead:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="ex">stack</span> install text-icu --extra-lib-dirs=/usr/local/opt/icu4c/lib --extra-include-dirs=/usr/local/opt/icu4c/include
 $ <span class="ex">stack</span> install yi</code></pre></div>
+<h2 id="pango-dependency">Pango dependency</h2>
+<p>Make sure the C library is available:</p>
+<pre><code>brew install pango</code></pre>
+<p>Pass <code>have-quartz-gtk</code> flag to cabal/stack when building (possibly transitively) the gtk package:</p>
+<pre><code>cabal install gtk -fhave-quartz-gtk
+# or
+stack install --flag gtk:have-quartz-gtk</code></pre>
+<p>Not passing that flag would result in a compilation failure like this:</p>
+<pre><code>Couldn't match expected type ‘Ptr ()’
+    with actual type ‘Maybe DrawWindow’</code></pre>
   </div>
 </div>
 

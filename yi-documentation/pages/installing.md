@@ -404,7 +404,9 @@ change versions often.
 
 [ghproject]: https://github.com/yi-editor
 
-# Installing Yi on MacOS
+# Installing Yi on macOS
+
+## ICU dependency
 
 If you're seeing an error like the following:
 
@@ -434,3 +436,25 @@ $ stack install text-icu --extra-lib-dirs=/usr/local/opt/icu4c/lib --extra-inclu
 $ stack install yi
 ~~~
 
+## Pango dependency
+
+Make sure the C library is available:
+
+~~~
+brew install pango
+~~~
+
+Pass `have-quartz-gtk` flag to cabal/stack when building (possibly transitively) the gtk package:
+
+~~~
+cabal install gtk -fhave-quartz-gtk
+# or
+stack install --flag gtk:have-quartz-gtk
+~~~
+
+Not passing that flag would result in a compilation failure like this:
+
+~~~
+Couldn't match expected type ‘Ptr ()’
+    with actual type ‘Maybe DrawWindow’
+~~~
