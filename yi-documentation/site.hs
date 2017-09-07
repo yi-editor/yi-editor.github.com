@@ -3,11 +3,15 @@
 import Control.Monad   (mapM)
 import Data.Monoid     ((<>))
 import System.FilePath (takeDirectory, takeBaseName, (</>))
+import System.Environment (setEnv)
 
 import Hakyll
 
 main :: IO ()
-main = hakyll $ do
+main = setEnv "hakyll_datadir" "." >> main'
+
+main' :: IO ()
+main' = hakyll $ do
   match "images/*" $ do
     route   idRoute
     compile copyFileCompiler
@@ -19,8 +23,8 @@ main = hakyll $ do
   match "pages/*" $ do
     route $ setExtension "html" `composeRoutes` niceRoute
     compile $ pandocCompiler
-      >>= loadAndApplyTemplate "templates/page.html"    defaultContext
-      >>= loadAndApplyTemplate "templates/default.html" defaultContext
+      >>= loadAndApplyTemplate "templates/page.html"    defaultContext'
+      >>= loadAndApplyTemplate "templates/default.html" defaultContext'
       >>= relativizeUrls
       >>= removeIndexHtml
 
@@ -36,7 +40,7 @@ main = hakyll $ do
   create ["atom.xml"] $ do
   route idRoute
   compile $ do
-      let feedCtx = postCtx `mappend` bodyField "description"
+      let feedCtx = postCtx <> bodyField "description"
       posts <- fmap (take 10) . recentFirst =<<
           loadAllSnapshots "posts/*" "content"
       renderAtom feedConfiguration feedCtx posts
@@ -49,7 +53,7 @@ main = hakyll $ do
       let indexCtx = listField "posts" postCtx        (return posts)
                   <> listField "pages" defaultContext (return pages)
                   <> constField "title" "Home"
-                  <> defaultContext
+                  <> defaultContext'
 
       getResourceBody
         >>= applyAsTemplate indexCtx
@@ -65,7 +69,7 @@ main = hakyll $ do
         let archiveCtx = listField "posts" postCtx        (return posts)
                       <> listField "pages" defaultContext (return pages)
                       <> constField "title" "Archive"
-                      <> defaultContext
+                      <> defaultContext'
 
         makeItem ""
           >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
@@ -76,7 +80,10 @@ main = hakyll $ do
   match "templates/*" $ compile templateCompiler
 
 postCtx :: Context String
-postCtx = dateField "date" "%B %e, %Y" <> defaultContext
+postCtx = dateField "date" "%B %e, %Y" <> defaultContext'
+
+defaultContext' :: Context String
+defaultContext' = defaultContext <> constField "feedRoot" (feedRoot feedConfiguration)
 
 
 -----------------------------------------------------------
@@ -103,8 +110,8 @@ removeIndexHtml item = return $ fmap (withUrls removeIndexStr) item
 feedConfiguration :: FeedConfiguration
 feedConfiguration = FeedConfiguration
     { feedTitle       = "Yi blog"
-    , feedDescription = "Yi blog"
+    , feedDescription = "Documentation for Yi, a text editor written in Haskell"
     , feedAuthorName  = "Yi developers"
     , feedAuthorEmail = "yi-devel@googlegroups.com"
-    , feedRoot        = "https://yi-editor.github.io/"
+    , feedRoot        = "https://yi-editor.github.io"
     }
