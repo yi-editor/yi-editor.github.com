@@ -59,12 +59,6 @@ yi-language. These are all described in
 [hpack](https://hackage.haskell.org/package/hpack) files, from which
 there will be derived appropriate Cabal files during building.
 
-Generally, Yi can be built using cabal or stack. For the stack users:
-Please note that stackage nightlies have recently been switched to GHC
-8. Since older versions of stack might fail to build Yi using GHC 8 or
-do not automatically generate Cabal files, consider upgrading to a recent
-version of stack in case you encounter build problems.
-
 ## Using Cabal-install
 
 You can build and install Yi from source using Cabal-install as
@@ -73,6 +67,7 @@ follows:
 ~~~ bash
 $ git clone https://github.com/yi-editor/yi
 $ cd yi
+$ hpack
 $ cabal update
 $ cabal install
 ~~~
