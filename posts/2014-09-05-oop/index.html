@@ -94,7 +94,7 @@ proto <span class="fu">=</span> \self <span class="ot">-&gt;</span> <span class=
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">abc <span class="fu">=</span> fix proto</code></pre></div>
 <p>Of course, this works only because Haskell is lazy (and because the original definition did not introduce an infinite recursion in the first place). If the fields of the record are marked strict, this ceases to work.</p>
 <p>Given that definition, it is easy to customize the value as follows:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">customizedProto <span class="fu">=</span> \self <span class="ot">-&gt;</span> proto self {
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">customizedProto <span class="fu">=</span> \self <span class="ot">-&gt;</span> (proto self) {
    c <span class="fu">=</span> userFunction (a self) (b self)
  }
 
